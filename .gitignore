@@ -2,7 +2,8 @@ audio/
 binFiles/
 cssFiles/
 locales/
-modFiles/
+modFiles/better-maps
+modFiles/party-shifts
 pnacl/
 swiftshader/
 chromedriver.exe
@@ -31,3 +32,4 @@ starIcon.png
 ThePoliticalProcess.exe
 v8_context_snapshot.bin
 .DS_Store
+.gitignore
