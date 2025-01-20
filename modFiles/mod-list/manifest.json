@@ -1,0 +1,17 @@
+{
+    "id": "mod-list",
+    "name": "Mod List",
+    "description": "Adds a list of loaded mods to the main menu.",
+    "author": "the Executive project",
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "revision": 0,
+        "string": "1.0.0"
+    },
+    "required_loader_version": {
+        "major": 0,
+        "minor": 1,
+        "revision": 0
+    }
+}

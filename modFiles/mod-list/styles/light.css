@@ -1,0 +1,23 @@
+/* Mod List - mod-list/styles/light.css
+   Light mode styling for UI elements */
+
+#modBackDiv {
+    background-color: rgba(64, 64, 64, 0.7);
+}
+
+#modMainDiv {
+    background-color: hsl(0, 0%, 90%);
+    color: hsl(0, 0%, 20%);
+}
+
+#modListDiv {
+    border-color: hsl(0, 0%, 40%);
+}
+
+.modListItem {
+    border-bottom-color: hsl(0, 0%, 20%);
+}
+
+.modListItemHeader .modListVersionId {
+    color: hsl(0, 0%, 40%);
+}
