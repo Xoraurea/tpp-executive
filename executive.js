@@ -3,7 +3,6 @@
 
 const fs = nw.require("fs");
 const path = nw.require("path");
-const vm = nw.require("vm");
 
 /* Get a list of symbols created by the game. */
 const postGlobals = Object.keys(globalThis);
@@ -245,7 +244,7 @@ Executive.debug = nw.require("executive/debug.js");
         if(obj._executiveModData === undefined) obj._executiveModData = {};
 
         /* We need to get the mod ID. */
-        const reducedMods = Executive.mods.loaded.filter(mod => mod._modPath === callerDir);
+        const reducedMods = Executive.mods.loaded.filter(mod => mod._modPath === callerDir.substring(0, mod._modPath.length));
         if(reducedMods.length === 0) throw new Error("Attempted to access mod data from script outside of mod directory");
 
         const targetMod = reducedMods[0];
@@ -437,7 +436,7 @@ if(!fs.existsSync("modFiles")){
     });
 };
 
-/* Mods will export init entrypoints. We should go through and call those. */
+/* Mods will export init entrypoints. We need to go through and call those. */
 Executive.mods.loaded.forEach(modEntry => {
     if(modEntry.exports.init !== undefined && typeof modEntry.exports.init === "function"){
         try {
@@ -471,7 +470,8 @@ Executive.functions.registerPostHook("addIntroMenu", () => {
     versionParagraph.appendChild(document.createTextNode(Executive.mods.count.toLocaleString() + " mod" + (Executive.mods.count === 1 ? "" : "s") + " loaded"));
 });
 
-/* TODO: Delete and reload the intro menu, as we can't hook in time to catch the first load */
+/* Once we've finished loading, we delete and reload the intro menu, as we can't hook
+   in time to catch the first load. */
 while(!document.getElementById("introMenuDiv")){}
 document.getElementById("introMenuDiv").remove();
 addIntroMenu();
