@@ -2,6 +2,16 @@
 
 The `Executive.functions` API implements methods to override or hook onto the behaviour of game functions.
 
+- [Executive – Functions API](#executive--functions-api)
+  - [Properties](#properties)
+  - [Functions](#functions)
+    - [registerReplacement(funcName : string, newFunc : function) : boolean](#registerreplacementfuncname--string-newfunc--function--boolean)
+    - [registerPreHook(funcName : string, hook : function) : number](#registerprehookfuncname--string-hook--function--number)
+    - [registerPostHook(funcName : string, hook : function) : number](#registerposthookfuncname--string-hook--function--number)
+    - [deregisterPreHook(funcName : string, hookId : number) : boolean](#deregisterprehookfuncname--string-hookid--number--boolean)
+    - [deregisterPostHook(funcName : string, hookId : number) : boolean](#deregisterposthookfuncname--string-hookid--number--boolean)
+    - [getOriginalFunction(funcName : string) : function](#getoriginalfunctionfuncname--string--function)
+
 ## Properties
 
 This API does not expose any properties to modifications.

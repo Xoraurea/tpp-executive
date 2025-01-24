@@ -2,6 +2,18 @@
 
 The `Executive.game` API implements a range of functions to influence the current state of the loaded game. These include functions implementing functionality exposed by custom events (such as party identification shifts).
 
+- [Executive – Game API](#executive--game-api)
+  - [Properties](#properties)
+    - [loaded : boolean](#loaded--boolean)
+  - [Functions](#functions)
+    - [triggerNextTurn() : void](#triggernextturn--void)
+    - [changeStatewidePartyID(stateId : string, sourceParty : string, destParty : string, percentage : number) : void](#changestatewidepartyidstateid--string-sourceparty--string-destparty--string-percentage--number--void)
+    - [createGeneralOfficeMessage(title : string, message : string, *character : CharacterObject*) : void](#creategeneralofficemessagetitle--string-message--string-character--characterobject--void)
+    - [createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createcitynewstitle--string-message--string-character--characterobject-week--number)
+    - [createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createstatenewstitle--string-message--string-character--characterobject-week--number)
+    - [createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createnationalnewstitle--string-message--string-character--characterobject-week--number)
+
+
 ## Properties
 
 ### loaded : boolean

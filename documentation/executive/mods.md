@@ -2,10 +2,17 @@
 
 `Executive.mods` catalogues currently loaded mods, while implementing additional mod-relative functions relating to save data and file paths.
 
-- `count` : number – Describes the number of mods loaded during the game's initialisation.
-- `loaded` : *ModObject* – An array containing every mod loaded.
-- `registry` : object – An object mapping mod IDs to their object representation.
-- `saveData` : object – Save data for the current game.
+- [Executive – Mods API](#executive--mods-api)
+  - [Properties](#properties)
+    - [count : number](#count--number)
+    - [loaded : Array](#loaded--array)
+    - [registry : object](#registry--object)
+    - [saveData : object](#savedata--object)
+  - [Functions](#functions)
+    - [getRelativePathPrefix() : string](#getrelativepathprefix--string)
+    - [getCharacterSaveData(character : CharacterObject) : object](#getcharactersavedatacharacter--characterobject--object)
+    - [getObjectSaveData(targetObj : object) : object](#getobjectsavedatatargetobj--object--object)
+  - [ModObject](#modobject)
 
 ## Properties
 

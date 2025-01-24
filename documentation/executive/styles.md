@@ -4,6 +4,11 @@ The `Executive.styles` API allows modifications to integrate CSS stylesheets for
 
 Priority of stylesheets added is dependent upon the order in which they are loaded – the last loaded stylesheet technically holds precedence over those loaded before, but *not* over the game's default stylesheet, which is always considered last. Mod developers are, however, advised not to rely upon this behaviour and to instead design their mods to avoid conflicts between CSS classes for added elements.
 
+- [Executive – Styles API](#executive--styles-api)
+  - [registerStyle(stylePath : string)](#registerstylestylepath--string)
+  - [registerThemeAwareStyle(lightStylePath : string, darkStylePath : string)](#registerthemeawarestylelightstylepath--string-darkstylepath--string)
+  - [registeredStyles : Array](#registeredstyles--array)
+
 ## registerStyle(stylePath : string)
 
 `registerStyle` adds a DOM element linking to a given stylesheet to the game's element tree, thus applying the style for the game. The path passed to `registerStyle` is interpreted as *relative to the directory of the file containing the caller function*. As an example, if `example-mod/common/funcs.js` called `registerStyle` with a `stylePath` of `styles/main.css`, the resulting DOM element would link to the stylesheet stored at `example-mod/common/styles/main.css`.

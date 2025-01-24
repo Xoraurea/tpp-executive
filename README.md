@@ -2,6 +2,15 @@
 
 Executive is a first-of-its-kind third-party mod loader for The Political Process, allowing players to install modifications which customise and add new functionality to the game. *Executive is not affiliated with Verlumino or The Political Process.*
 
+- [Welcome to Executive!](#welcome-to-executive)
+  - [Setting up Executive](#setting-up-executive)
+    - [Copying files](#copying-files)
+    - [Modifying index.html and package.json](#modifying-indexhtml-and-packagejson)
+    - [Installing mods](#installing-mods)
+  - [Creating mods for Executive](#creating-mods-for-executive)
+    - [Installing the nw.js SDK](#installing-the-nwjs-sdk)
+    - [Creating a new mod](#creating-a-new-mod)
+
 ## Setting up Executive
 
 Installing Executive is as easy as copying the mod loader's files to your game directory and making two small modifications to existing files. Your game folder can be found by opening your Steam library, right-clicking on `The Political Process`, opening `Properties`, navigating to `Installed Files` and then clicking `Browse`. For most people, the directory this opens will be at `C:\Program Files (x86)\Steam\steamapps\common\The Political Process`.

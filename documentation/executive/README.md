@@ -4,6 +4,22 @@ Executive introduces a basic API to simplify the process of working with the gam
 
 **Disclaimer:** Executive is beta software and the API is not considered stable. Modification developers should anticipate the possibility of breaking changes with any update to the loader and/or API.
 
+- [Executive – Application Programming Interface](#executive--application-programming-interface)
+  - [Executive.functions](#executivefunctions)
+    - [Children](#children)
+  - [Executive.styles](#executivestyles)
+    - [Children](#children-1)
+  - [Executive.game](#executivegame)
+    - [Children](#children-2)
+  - [Executive.data](#executivedata)
+  - [Executive.mods](#executivemods)
+    - [ModObject](#modobject)
+  - [Executive.version](#executiveversion)
+  - [Executive.enums](#executiveenums)
+  - [Executive.debug](#executivedebug)
+    - [Children](#children-3)
+
+
 ## Executive.functions
 
 [Executive.functions](functions.md) contains several child functions for handling interoperation with the game's internal functions and mod code. These allow mods to hook onto game functions or replace the functionality of game functions.
@@ -49,7 +65,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 
 ## Executive.mods
 
-`Executive.mods` catalogues currently loaded mods, while implementing additional mod-relative functions relating to save data and file paths.
+[Executive.mods](mods.md) catalogues currently loaded mods, while implementing additional mod-relative functions relating to save data and file paths.
 
 - `count` : number – Describes the number of mods loaded during the game's initialisation.
 - `loaded` : *ModObject* – An array containing every mod loaded.

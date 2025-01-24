@@ -2,6 +2,16 @@
 
 The `Executive.data` API provides various ways for mods to interact with the data structures used internally by The Political Process. The data API is split into three categories – `Executive.data.states` allows mods to access objects representing US states, `Executive.data.characters` allows for easier interaction with the arrays used to represent game characters and `Executive.data.politicians` implements methods and properties to access incumbent politicians at each tier of government.
 
+- [Executive – Data API](#executive--data-api)
+  - [Executive.data.states](#executivedatastates)
+  - [Executive.data.characters](#executivedatacharacters)
+    - [CharacterObject](#characterobject)
+      - [CharacterObject Properties](#characterobject-properties)
+    - [wrapCharacter(character : CharacterArray, type : string) : CharacterObject](#wrapcharactercharacter--characterarray-type--string--characterobject)
+  - [Executive.data.politicians](#executivedatapoliticians)
+    - [getStatePoliticians(state : object, *includeLocals : boolean*, *wrapped : boolean*) : Array](#getstatepoliticiansstate--object-includelocals--boolean-wrapped--boolean--array)
+    - [getStatewidePoliticians(state : object,  *wrapped : boolean*) : Array](#getstatewidepoliticiansstate--object--wrapped--boolean--array)
+
 ## Executive.data.states
 
 The `Executive.data.states` property contains each of the fifty states as objects. These may be accessed by their abbreviations in lower case – for example, `Executive.data.states.pa` returns the game's object representing Pennsylvania. In addition, every state object is contained within the `Executive.data.states.allStates` array. State objects contain upwards of a thousand uncategorised key-value pairs; as such, they are not documented as part of the Executive project. Mod developers seeking to interact with in-game states or the game's `nationStats`/`cityStats` objects are advised to use Developer Tools to search for relevant properties. Note that not every property can be simply written to for modification – some will reset at the start of the next in-game year.
