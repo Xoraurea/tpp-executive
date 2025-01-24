@@ -29,13 +29,34 @@ Priority of stylesheets added is dependent upon the order in which they are load
 - `registerThemeAwareStyle(lightStylePath, darkStylePath)` – Register a pair of stylesheets to be used depending on whether the game is in light or dark mode.
 - `registeredStyles` – A list of objects containing currently registered stylesheets.
 
+## Executive.game
+
+[Executive.game](game.md) exposes child functions to influence the current state of the loaded game. These include functions implementing functionality exposed by custom events (such as party identification shifts).
+
+### Children
+
+- `loaded` – Represents whether the player has loaded a save/started a new game.
+- `triggerNextTurn()` – Trigger the next in-game turn.
+- `changeStatewidePartyID(stateId, sourceParty, destParty, percentage)` – Move a percentage amount of voters identifying with one party to a different party in the given state.
+- `createGeneralOfficeMessage(title, message, character)` – Create a message in the Summary tab of the Office pane.
+- `createCityNews(title, message, character, week)` – Create a city-wide news item in the News pane.
+- `createStateNews(title, message, character, week)` – Create a state-wide news item in the News pane.
+- `createNationalNews(title, message, character, week)` – Create a nationwide news item in the News pane.
+
+## Executive.data
+
+[Executive.data](data.md) provides methods for mods to interact with the data structures used internally by the game. The data API is split into three categories – `Executive.data.states` allows mods to access objects representing US states, `Executive.data.characters` allows for easier interaction with the arrays used to represent game characters and `Executive.data.politicians` implements methods and properties to access incumbent politicians at each tier of in-game government.
+
 ## Executive.mods
 
 `Executive.mods` catalogues currently loaded mods, while implementing additional mod-relative functions relating to save data and file paths.
 
-- `Executive.mods.count` : number – Describes the number of mods loaded during the game's initialisation.
-- `Executive.mods.loaded` : *ModObject* – An array containing every mod loaded.
-- `Executive.mods.registry` : object – An object mapping mod IDs to their object representation.
+- `count` : number – Describes the number of mods loaded during the game's initialisation.
+- `loaded` : *ModObject* – An array containing every mod loaded.
+- `registry` : object – An object mapping mod IDs to their object representation.
+- `saveData` : object – Save data for the current game.
+- `getCharacterSaveData(character)` – Get the object containing mod save data for a given character.
+- `getObjectSaveData(targetObj)` – Get the object containing mod save data for a game object. *Not recommended for use.*
 
 ### ModObject
 
@@ -59,24 +80,23 @@ Mods are described internally by their `ModObject`. The child properties are lar
 
 The `Executive.version` object describes the version of Executive running.
 
-- `Executive.version.major` : number – The major component of the semantic version.
-- `Executive.version.minor` : number – The minor component of the semantic version.
-- `Executive.version.revision` : number – The revision component of the semantic version.
-- `Executive.version.string` : string – A human-readable representation of the version.
-- `Executive.version.gameVersion` : number – The version of The Political Process running.
+- `major` : number – The major component of the semantic version.
+- `minor` : number – The minor component of the semantic version.
+- `revision` : number – The revision component of the semantic version.
+- `string` : string – A human-readable representation of the version.
+- `gameVersion` : number – The version of The Political Process running.
 
 ## Executive.enums
 
-*Under construction.*
-
-## Executive.data.states
-
-*Under construction.*
-
-## Executive.data.characters
-
-*Under construction.*
+`Executive.enums` contains enums for use when working with game objects. The sole child, `characterArray`, contains child objects corresponding to each type of in-game character, with each child object containing properties representing the index in a CharacterArray for the relevant character property. This enum largely exists for internal use.
 
 ## Executive.debug
 
-*Under construction.*
+[Executive.debug](debug.md) allows mod developers to trace the execution of game functions for the purpose of reverse engineering.
+
+### Children
+
+- `logFunctionCalls` : boolean – Determines whether traces of function calls are logged to the developer tools console.
+- `logWrappedObjects` : boolean – Determines whether accesses for logger objects are logged to the developer tools console.
+- `printTraceDuringExecution` : boolean – Determines whether a running log of called functions is logged to the developer tools console.
+- `createLoggerProxy(targetObj, name)` – Creates a proxy for a given object which logs accesses to and from the inner object to the developer tools console.

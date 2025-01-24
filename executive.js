@@ -260,7 +260,7 @@ Executive.debug = nw.require("executive/debug.js");
     };
 
     Executive.mods.getObjectSaveData = (targetObj) => {
-        /* Get the data stored for a CharacterObject for a mod. */
+        /* Get the data stored for an object for a mod. */
         if(typeof targetObj !== "object") throw new Error("Expected object");
         return getModData(targetObj, getCallerDir().substring(__dirname.length + 1) + path.sep);
     };
@@ -274,6 +274,7 @@ Executive.debug = nw.require("executive/debug.js");
 
     Object.defineProperty(Executive.mods, "saveData", {
         get: () => {
+            if(!Executive.game.loaded) throw new Error("Not in a loaded game");
             return getModData(globalThis, getCallerDir().substring(__dirname.length + 1) + path.sep);
         }
     });

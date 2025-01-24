@@ -1,0 +1,59 @@
+# Executive – Game API
+
+The `Executive.game` API implements a range of functions to influence the current state of the loaded game. These include functions implementing functionality exposed by custom events (such as party identification shifts).
+
+## Properties
+
+### loaded : boolean
+
+`loaded` represents whether the player is in a loaded instance of the game – meaning a saved game has been loaded or a new game has been started.
+
+## Functions
+
+### triggerNextTurn() : void
+
+`triggerNextTurn` moves to the next game turn when called in a loaded game, incrementing the week counter and triggering events as appropriate. This function will throw an error if called while no game is loaded.
+
+### changeStatewidePartyID(stateId : string, sourceParty : string, destParty : string, percentage : number) : void
+
+`changeStatewidePartyID` allows mods to adjust the proportion of the electorate in a given state who support a political party, moving support from one party or another. The function moves `percentage` support from `sourceParty` to `destParty` in the state identified by `stateId`. If there are not enough supporters of `sourceParty` in the state, the change will not occur. This function will throw an error if called while no game is loaded.
+
+- `stateId` : string – The two-letter abbreviation of the target state. Can be upper-case or lower-case.
+- `sourceParty` : string – The single-letter abbreviation of the targeted source party. Can be `D`, `R` or `I`.
+- `destParty` : string – The single-letter abbreviation of the targeted destination party. Can be `D`, `R` or `I`.
+- `percentage` : number – The percentage of the electorate who change party identification. Must be between `0` and `1`.
+
+### createGeneralOfficeMessage(title : string, message : string, *character : CharacterObject*) : void
+
+`createGeneralOfficeMessage` will create a message in the Summary tab of the game's Office pane. The created message will appear under the General Messages heading in the All pane, with the title and contents given by `title` and `message`. If `character` is passed, the message will also contain a portrait for the corresponding character. This function will throw an error if called while no game is loaded.
+
+- `title` : string – The title of the message to be created.
+- `message` : string – The contents of the message to be created.
+- `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the message.
+
+### createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+
+`createCityNews` adds a new news item to the City tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
+
+- `title` : string – The title of the news item to be created.
+- `message` : string – The contents of the news item to be created.
+- `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
+- `week` : number – *Optional.* The week number of the news item to be created.
+
+### createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+
+`createStateNews` adds a new news item to the State tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
+
+- `title` : string – The title of the news item to be created.
+- `message` : string – The contents of the news item to be created.
+- `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
+- `week` : number – *Optional.* The week number of the news item to be created.
+
+### createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+
+`createNationalNews` adds a new news item to the Nation tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
+
+- `title` : string – The title of the news item to be created.
+- `message` : string – The contents of the news item to be created.
+- `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
+- `week` : number – *Optional.* The week number of the news item to be created.

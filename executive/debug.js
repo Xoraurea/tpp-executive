@@ -7,7 +7,8 @@ if(Executive.functions === undefined){
 } else {
     const debug = {
         logFunctionCalls: false,
-        logWrappedObjects: true
+        logWrappedObjects: true,
+        printTraceDuringExecution: false
     };
 
     /* We need to install hooks for exploring function calls. */
@@ -27,11 +28,14 @@ if(Executive.functions === undefined){
             Executive.functions.registerPreHook(symbol, (args) => {
                 if(debug.logFunctionCalls){
                     const tabSpace = "   ".repeat(currentWrapLevel);
-                    console.log(tabSpace + "Calling " + symbol);
+                    
+                    if(debug.printTraceDuringExecution) {
+                        console.log(tabSpace + "Calling " + symbol);
 
-                    for(let i = 0; i < args.length; i++){
-                        console.log(tabSpace + " - Argument " + i.toString() + ": " + args[i]);
-                    };
+                        for(let i = 0; i < args.length; i++){
+                            console.log(tabSpace + " - Argument " + i.toString() + ": " + args[i]);
+                        };
+                    }
 
                     const newNode = {
                         functionSig: symbol,
@@ -62,7 +66,7 @@ if(Executive.functions === undefined){
                         baseCallTree.children = [];
                     };
 
-                    if(rtnVal !== undefined) console.log(tabSpace + " - Returning " + rtnVal);
+                    if(rtnVal !== undefined && debug.printTraceDuringExecution) console.log(tabSpace + " - Returning " + rtnVal);
                 };
             });
         });
