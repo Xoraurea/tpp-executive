@@ -9,8 +9,8 @@ The `Executive.data` API provides various ways for mods to interact with the dat
       - [CharacterObject Properties](#characterobject-properties)
     - [wrapCharacter(character : CharacterArray, type : string) : CharacterObject](#wrapcharactercharacter--characterarray-type--string--characterobject)
   - [Executive.data.politicians](#executivedatapoliticians)
-    - [getStatePoliticians(state : object, *includeLocals : boolean*, *wrapped : boolean*) : Array](#getstatepoliticiansstate--object-includelocals--boolean-wrapped--boolean--array)
-    - [getStatewidePoliticians(state : object,  *wrapped : boolean*) : Array](#getstatewidepoliticiansstate--object--wrapped--boolean--array)
+    - [getStatePoliticians(state : object, *includeLocals : boolean*, *wrapped : boolean*) : Array\<CharacterObject\>](#getstatepoliticiansstate--object-includelocals--boolean-wrapped--boolean--arraycharacterobject)
+    - [getStatewidePoliticians(state : object,  *wrapped : boolean*) : Array\<CharacterObject\>](#getstatewidepoliticiansstate--object--wrapped--boolean--arraycharacterobject)
 
 ## Executive.data.states
 
@@ -46,7 +46,7 @@ In most cases, mod developers should ignore the underlying array representation 
 - `caucusParty` (`candidate`/`history`) : string – Describes the party the character *caucuses/did caucus* with. Can only be `Democrat` or `Republican`.
 - `partyInnerCaucus` (`candidate`/`history`) : string – Describes the in-party caucus the character is a member of. Can be `Progressive Democrats`, `Moderate Democratic Coalition`, `Conservative Democrats`, `Republican Conservative Committee`, `Moderate Republican Caucus` or `Libertarian Caucus`.
 - `stateId` (`candidate`/`history`) : string – The upper-case abbrievated name of the character's home state.
-- `jobHistory` (`candidate`/`history`) : Array – An array of objects representing jobs held by the individual through their life. Each object has three child properties.
+- `jobHistory` (`candidate`/`history`) : Array\<object\> – An array of objects representing jobs held by the individual through their life. Each object has three child properties.
     - `title` : string – The human-readable description of the role.
     - `start` : number – The starting year of the role.
     - `end` : number – The final year of the role.
@@ -170,13 +170,13 @@ The `Executive.data.politicians` object contains various properties to access in
     - `junior` : CharacterObject – The junior US Senator from the state represented by the object.
 - `usHouse` : object – An object with properties containing ordered arrays of CharacterObjects representing every state's US House of Representatives delegation. May be indexed with lower-case state abbreviations. (e.g. `Executive.data.politicians.usHouse.ct`)
 - `localGovernor` : CharacterObject – The incumbent governor in the player character's home state.
-- `localStateSenate` : Array – An ordered array of characters in the state Senate in the player character's home state.
-- `localStateHouse` : Array – An ordered array of characters in the state House in the player character's home state.
+- `localStateSenate` : Array\<CharacterObject\> – An ordered array of characters in the state Senate in the player character's home state.
+- `localStateHouse` : Array\<CharacterObject\> – An ordered array of characters in the state House in the player character's home state.
 - `localMayor` : CharacterObject – The incumbent mayor in the player character's home city.
-- `localCityCouncil` : Array – An ordered array of characters in the City Council in the player character's home city.
-- `localSchoolBoard` : Array – An ordered array of characters in the School Board in the player character's home city.
+- `localCityCouncil` : Array\<CharacterObject\> – An ordered array of characters in the City Council in the player character's home city.
+- `localSchoolBoard` : Array\<CharacterObject\> – An ordered array of characters in the School Board in the player character's home city.
 
-### getStatePoliticians(state : object, *includeLocals : boolean*, *wrapped : boolean*) : Array<CharacterObject>
+### getStatePoliticians(state : object, *includeLocals : boolean*, *wrapped : boolean*) : Array\<CharacterObject\>
 
 `getStatePoliticians` gets every incumbent elected politician within a given state. The function returns an array of wrapped CharacterObjects corresponding to the desired politicians.
 
@@ -184,7 +184,7 @@ The `Executive.data.politicians` object contains various properties to access in
 - `includeLocals` : boolean – *Optional.* Determines whether politicians from the state House and Senate are included when `state` refers to the player's home state. Default is `true`.
 - `wrapped` : boolean – *Optional.* Determines whether the objects returned are wrapped as CharacterObjects or are left as CharacterArrays. Default is `true`.
 
-### getStatewidePoliticians(state : object,  *wrapped : boolean*) : Array<CharacterObject>
+### getStatewidePoliticians(state : object,  *wrapped : boolean*) : Array\<CharacterObject\>
 
 `getStatewidePoliticians` gets every statewide incumbent elected politician within a given state. The function returns an array of wrapped CharacterObjects corresponding to the desired politicians.
 

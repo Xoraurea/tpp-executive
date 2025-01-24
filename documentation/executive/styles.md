@@ -7,7 +7,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 - [Executive – Styles API](#executive--styles-api)
   - [registerStyle(stylePath : string)](#registerstylestylepath--string)
   - [registerThemeAwareStyle(lightStylePath : string, darkStylePath : string)](#registerthemeawarestylelightstylepath--string-darkstylepath--string)
-  - [registeredStyles : Array](#registeredstyles--array)
+  - [registeredStyles : Array\<object\>](#registeredstyles--arrayobject)
 
 ## registerStyle(stylePath : string)
 
@@ -24,7 +24,7 @@ The paths passed to `registerThemeAwareStyle` are interpreted as *relative to th
 - `lightStylePath` : string – The relative path pointing to the stylesheet to be used when light mode is enabled.
 - `darkStylePath` : string – The relative path pointing to the stylesheet to be used when dark mode is enabled.
 
-## registeredStyles : Array
+## registeredStyles : Array\<object\>
 
 `registeredStyles` is an array of currently registered mod stylesheets, largely intended for internal use. Each entry is an object with the following properties. For non-theme-aware styles, the `light` and `dark` properties are always equal.
 

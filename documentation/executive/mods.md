@@ -5,7 +5,7 @@
 - [Executive – Mods API](#executive--mods-api)
   - [Properties](#properties)
     - [count : number](#count--number)
-    - [loaded : Array](#loaded--array)
+    - [loaded : Array\<ModObject\>](#loaded--arraymodobject)
     - [registry : object](#registry--object)
     - [saveData : object](#savedata--object)
   - [Functions](#functions)
@@ -20,7 +20,7 @@
 
 `count` describes the number of mods loaded during the game's initialisation. May be any number greater than `0`.
 
-### loaded : Array<ModObject>
+### loaded : Array\<ModObject\>
 
 `loaded` contains an array with elements representing every mod loaded during the game's initialisation. Elements are `ModObject`s.
 

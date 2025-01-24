@@ -24,7 +24,7 @@ Once a top-level game function finishes executing, a TraceObject is logged to th
 - `functionSig` : string – The name of the function called.
 - `functionArgs` : Array – An array of arguments passed to the function.
 - `functionRtn` : any – The value returned by the function. `undefined` if nothing is returned.
-- `children` : Array<TraceObject> – An array of TraceObjects for every game function called by the function.
+- `children` : Array\<TraceObject\> – An array of TraceObjects for every game function called by the function.
 
 ### logWrappedObjects : boolean
 
