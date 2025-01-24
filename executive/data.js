@@ -50,7 +50,15 @@
     };
 
     charactersObj.wrapCharacter = (character, type) => {
-        if(Executive.enums.characterArray[type] === undefined) throw new Error("Unrecognised character type ("+ type + ")");
+        /* This is an undocumented feature of the API – if a type isn't passed, we'll use the heuristic
+           of array length to try to determine the type of the character. */
+        if(type === undefined){
+            if(character.length === Executive.enums.characterLength.candidate) type = "candidate";
+            if(character.length === Executive.enums.characterLength.history) type = "history";
+            if(character.length === Executive.enums.characterLength.staff) type = "staff";
+        }
+
+        if(Executive.enums.characterArray[type] === undefined) throw new Error("Unrecognised character type (" + type + ")");
 
         const indexEnum = Executive.enums.characterArray[type];
         const subProxies = {};

@@ -22,7 +22,12 @@ let Executive = {
         registry: {}
     },
     enums: {
-        characterArray: nw.require("executive/enums/character_enums.js")
+        characterArray: nw.require("executive/enums/character_enums.js"),
+        characterLength: {
+            candidate: 183,
+            history: 51,
+            staff: 44
+        }
     },
     symbols: {
         functions: filteredList.filter(entry => (typeof globalThis[entry] === "function")),

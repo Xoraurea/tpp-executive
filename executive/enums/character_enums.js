@@ -70,18 +70,14 @@ module.exports = {
       },
 
       partyInnerCaucus: 96,
-
       candidateId: 111,
-
+      traits: 122,
       stateId: 127,
-
       jobs: 129,
       politicalPoints: 134,
       campaignFunds: 136,
       nameRecognition: 146,
-
       jobHistory: 169,
-
       extendedAttribs: 178
    },
    staff: {

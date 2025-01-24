@@ -5,6 +5,8 @@ The `Executive.game` API implements a range of functions to influence the curren
 - [Executive – Game API](#executive--game-api)
   - [Properties](#properties)
     - [loaded : boolean](#loaded--boolean)
+    - [traits : Array](#traits--array)
+    - [customTraits : Array](#customtraits--array)
   - [Functions](#functions)
     - [triggerNextTurn() : void](#triggernextturn--void)
     - [changeStatewidePartyID(stateId : string, sourceParty : string, destParty : string, percentage : number) : void](#changestatewidepartyidstateid--string-sourceparty--string-destparty--string-percentage--number--void)
@@ -12,6 +14,7 @@ The `Executive.game` API implements a range of functions to influence the curren
     - [createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createcitynewstitle--string-message--string-character--characterobject-week--number)
     - [createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createstatenewstitle--string-message--string-character--characterobject-week--number)
     - [createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createnationalnewstitle--string-message--string-character--characterobject-week--number)
+    - [registerTrait(traitName : string)](#registertraittraitname--string)
 
 
 ## Properties
@@ -19,6 +22,14 @@ The `Executive.game` API implements a range of functions to influence the curren
 ### loaded : boolean
 
 `loaded` represents whether the player is in a loaded instance of the game – meaning a saved game has been loaded or a new game has been started.
+
+### traits : Array<string>
+
+`traits` is an array containing every trait that can be added to a character through the customisation menu, including any custom traits added through Executive by modifications.
+
+### customTraits : Array<string>
+
+`traits` is an array containing every custom trait added to the game through Executive by modifications.
 
 ## Functions
 
@@ -69,3 +80,9 @@ The `Executive.game` API implements a range of functions to influence the curren
 - `message` : string – The contents of the news item to be created.
 - `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
 - `week` : number – *Optional.* The week number of the news item to be created.
+
+### registerTrait(traitName : string)
+
+`registerTrait` adds a trait with the name `traitName` to the game, allowing the player to add it to any character via the character customisation screen. These traits will not currently be picked when using the Randomize button.
+
+- `traitName` : string – The name of the trait to be added.
