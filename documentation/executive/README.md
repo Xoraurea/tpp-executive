@@ -43,7 +43,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 
 - `registerStyle(stylePath)` – Register a stylesheet at the given path to be used in both light and dark mode.
 - `registerThemeAwareStyle(lightStylePath, darkStylePath)` – Register a pair of stylesheets to be used depending on whether the game is in light or dark mode.
-- `registeredStyles` : Array<object> – A list of objects containing currently registered stylesheets.
+- `registeredStyles` : Array\<object\> – A list of objects containing currently registered stylesheets.
 
 ## Executive.game
 
@@ -52,8 +52,8 @@ Priority of stylesheets added is dependent upon the order in which they are load
 ### Children
 
 - `loaded` : boolean – Represents whether the player has loaded a save/started a new game.
-- `traits` : Array<string> – An array of user-selectable traits for customisation.
-- `customTraits` : Array<string> – An array containing every trait added by modifications through Executive.
+- `traits` : Array\<string\> – An array of user-selectable traits for customisation.
+- `customTraits` : Array\<string\> – An array containing every trait added by modifications through Executive.
 - `triggerNextTurn()` – Trigger the next in-game turn.
 - `changeStatewidePartyID(stateId, sourceParty, destParty, percentage)` – Move a percentage amount of voters identifying with one party to a different party in the given state.
 - `createGeneralOfficeMessage(title, message, character)` – Create a message in the Summary tab of the Office pane.
