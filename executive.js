@@ -13,8 +13,8 @@ let Executive = {
         major: 0,
         minor: 1,
         revision: 0,
-        string: "b0.1.0",
-        gameVersion: version
+        string: "b0.1.0"
+        //gameVersion: version
     },
     mods: {
         count: 0,

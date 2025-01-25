@@ -4,6 +4,7 @@ The `Executive.game` API implements a range of functions to influence the curren
 
 - [Executive – Game API](#executive--game-api)
   - [Properties](#properties)
+    - [version : number](#version--number)
     - [loaded : boolean](#loaded--boolean)
     - [traits : Array\<string\>](#traits--arraystring)
     - [customTraits : Array\<string\>](#customtraits--arraystring)
@@ -18,6 +19,10 @@ The `Executive.game` API implements a range of functions to influence the curren
 
 
 ## Properties
+
+### version : number
+
+`version` contains the numeric version of The Political Process running.
 
 ### loaded : boolean
 

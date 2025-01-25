@@ -4,7 +4,9 @@
 const { updateTooltip } = require("../modFiles/better-maps/tooltip");
 
 {
-    const game = {};
+    const game = {
+        version: version
+    };
 
     /* Move percentage support from sourceParty to destParty. */
     game.changeStatewidePartyID = (stateId, sourceParty, destParty, percentage) => {

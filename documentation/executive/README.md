@@ -51,6 +51,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 
 ### Children
 
+- `version` : number – The version of The Political Process running.
 - `loaded` : boolean – Represents whether the player has loaded a save/started a new game.
 - `traits` : Array\<string\> – An array of user-selectable traits for customisation.
 - `customTraits` : Array\<string\> – An array containing every trait added by modifications through Executive.
@@ -102,7 +103,6 @@ The `Executive.version` object describes the version of Executive running.
 - `minor` : number – The minor component of the semantic version.
 - `revision` : number – The revision component of the semantic version.
 - `string` : string – A human-readable representation of the version.
-- `gameVersion` : number – The version of The Political Process running.
 
 ## Executive.enums
 

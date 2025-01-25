@@ -4,6 +4,7 @@ cssFiles/
 locales/
 modFiles/better-maps
 modFiles/party-shifts
+modFiles/event-commander
 pnacl/
 swiftshader/
 chromedriver.exe
