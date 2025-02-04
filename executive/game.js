@@ -98,9 +98,12 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
        reload of the game for some reason, we just need to set true whenever a save is loaded. */
     let gameLoaded = false;
 
-    Executive.functions.registerPostHook("loadFunction", () => {
+    const setLoaded = () => {
         gameLoaded = true;
-    });
+    };
+
+    Executive.functions.registerPostHook("loadFunction", setLoaded);
+    Executive.functions.registerPostHook("startGameCalc", setLoaded);
 
     Object.defineProperty(game, "loaded", {
         get: () => {
