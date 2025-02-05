@@ -11,6 +11,7 @@ The `Executive.functions` API implements methods to override or hook onto the be
     - [deregisterPreHook(funcName : string, hookId : number) : boolean](#deregisterprehookfuncname--string-hookid--number--boolean)
     - [deregisterPostHook(funcName : string, hookId : number) : boolean](#deregisterposthookfuncname--string-hookid--number--boolean)
     - [getOriginalFunction(funcName : string) : function](#getoriginalfunctionfuncname--string--function)
+    - [getFunctionOverwritten(funcName : string) : boolean](#getfunctionoverwrittenfuncname--string--boolean)
 
 ## Properties
 
@@ -63,5 +64,11 @@ This API does not expose any properties to modifications.
 ### getOriginalFunction(funcName : string) : function
 
 `getOriginalFunction` allows mod code to fetch the reference to the original definition of an internal game function, ignoring invocation of any registered hooks and any registered replacement function. This is intended for use by replacement functions to recycle the game's original behaviour where appropriate.
+
+- `funcName` : string – The name of the internal function as defined in the global environment.
+
+### getFunctionOverwritten(funcName : string) : boolean
+
+`getFunctionOverwritten` checks whether a game function has been overwritten by a mod. Returns `true` if the function in question has been overwritten.
 
 - `funcName` : string – The name of the internal function as defined in the global environment.

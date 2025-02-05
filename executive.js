@@ -161,7 +161,42 @@ console.log("[Executive] Executive for The Political Process (" + Executive.vers
             if(originalFuncTable[funcName] === undefined) throw new Error("Mod attempted to fetch non-existent original game function");
 
             return originalFuncTable[funcName];
-        }
+        },
+        getFunctionOverwritten: (funcName) => {
+            /* Returns true if the function in question has been overwritten by a mod. */
+            return (updatedFuncTable[funcName] !== undefined);
+        },
+        /* Undocumented internal functions. These should be cleared later in this script before mod
+           initialisation. */
+        createRawPreHook: (funcName, hook) => {
+            /* Undocumented internal function cleared upon mod initialisation.
+               Creates a pre-hook to be called after the original form of an internal function executes. */
+            if(originalFuncTable[funcName] === undefined){
+                console.error("[Executive] Executive attempted to register raw pre-hook for non-existent internal function (" + funcName + ")");
+                return;
+            }
+
+            const baseOriginalFunc = originalFuncTable[funcName];
+            originalFuncTable[funcName] = (...args) => {
+                hook(args, funcName);
+                return baseOriginalFunc(...args);
+            }
+        },
+        createRawPostHook: (funcName, hook) => {
+            /* Undocumented internal function cleared upon mod initialisation.
+               Creates a post-hook to be called after the original form of an internal function executes. */
+               if(originalFuncTable[funcName] === undefined){
+                console.error("[Executive] Executive attempted to register raw pre-hook for non-existent internal function (" + funcName + ")");
+                return;
+            }
+
+            const baseOriginalFunc = originalFuncTable[funcName];
+            originalFuncTable[funcName] = (...args) => {
+                const rtnVal = baseOriginalFunc(...args);
+                hook(args, rtnVal, funcName);
+                return rtnVal;
+            }
+        },
     };
 
     /* We iterate over every new function defined. */
@@ -191,7 +226,7 @@ console.log("[Executive] Executive for The Political Process (" + Executive.vers
                 /* If a mod has replaced the definition of the function, we should call the replacement instead. */
                 let rtnVal = undefined;
                 if(updatedFuncTable[entry] !== undefined) rtnVal = updatedFuncTable[entry](...args);
-                else rtnVal = realEntry(...args);
+                else rtnVal = originalFuncTable[entry](...args);
 
                 /* Call every post-hook. */
                 for(let hookIndex = 0; hookIndex < funcHookTable[entry].afterCall.length; hookIndex++){
@@ -442,6 +477,31 @@ if(!fs.existsSync("modFiles")){
     });
 };
 
+/* We'll install a pre-hook to load global mod save data before the game fully loads. */
+Executive.functions.createRawPreHook("loadFunction", (args) => {
+    const savePath = nw.App.dataPath + path.sep + "saveFiles" + path.sep + "campaignSaves" + path.sep + args[0];
+    const saveObj = JSON.parse(fs.readFileSync(savePath, "utf8"));
+    if(saveObj._executiveModData !== undefined){
+        globalThis._executiveModData = saveObj._executiveModData
+    } else {
+        globalThis._executiveModData = {};
+    };
+});
+
+/* Add the version string to the main menu on first load. */
+Executive.functions.createRawPostHook("addIntroMenu", () => {
+    const versionParagraph = document.getElementById("mainIntroVersionP");
+
+    versionParagraph.appendChild(document.createElement("br"));
+    versionParagraph.appendChild(document.createTextNode("Running Executive for The Political Process (" + Executive.version.string + ")"));
+    versionParagraph.appendChild(document.createElement("br"));
+    versionParagraph.appendChild(document.createTextNode(Executive.mods.count.toLocaleString() + " mod" + (Executive.mods.count === 1 ? "" : "s") + " loaded"));
+});
+
+/* Now clean up internal Executive functions. */
+Executive.functions.createRawPreHook = undefined;
+Executive.functions.createRawPostHook = undefined;
+
 /* Mods will export init entrypoints. We need to go through and call those. */
 Executive.mods.loaded.forEach(modEntry => {
     if(modEntry.exports.init !== undefined && typeof modEntry.exports.init === "function"){
@@ -453,28 +513,7 @@ Executive.mods.loaded.forEach(modEntry => {
     }
 });
 
-/* We'll install a pre-hook to load global mod save data before the game fully loads. */
-Executive.functions.registerPreHook("loadFunction", (args) => {
-    const savePath = nw.App.dataPath + path.sep + "saveFiles" + path.sep + "campaignSaves" + path.sep + args[0];
-    const saveObj = JSON.parse(fs.readFileSync(savePath, "utf8"));
-    if(saveObj._executiveModData !== undefined){
-        globalThis._executiveModData = saveObj._executiveModData
-    } else {
-        globalThis._executiveModData = {};
-    };
-});
-
 console.log("[Executive] Loaded " + Executive.mods.count.toString() + " mod" + ((Executive.mods.count !== 1) ? "s" : "") +".");
-
-/* Add the version string to the main menu on first load. */
-Executive.functions.registerPostHook("addIntroMenu", () => {
-    const versionParagraph = document.getElementById("mainIntroVersionP");
-
-    versionParagraph.appendChild(document.createElement("br"));
-    versionParagraph.appendChild(document.createTextNode("Running Executive for The Political Process (" + Executive.version.string + ")"));
-    versionParagraph.appendChild(document.createElement("br"));
-    versionParagraph.appendChild(document.createTextNode(Executive.mods.count.toLocaleString() + " mod" + (Executive.mods.count === 1 ? "" : "s") + " loaded"));
-});
 
 /* Once we've finished loading, we delete and reload the intro menu, as we can't hook
    in time to catch the first load. */

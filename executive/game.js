@@ -102,8 +102,8 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
         gameLoaded = true;
     };
 
-    Executive.functions.registerPostHook("loadFunction", setLoaded);
-    Executive.functions.registerPostHook("startGameCalc", setLoaded);
+    Executive.functions.createRawPostHook("loadFunction", setLoaded);
+    Executive.functions.createRawPostHook("startGameCalc", setLoaded);
 
     Object.defineProperty(game, "loaded", {
         get: () => {
@@ -141,7 +141,7 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
     /* Now the slightly harder bit, where we have to hook the creation of the trait tab in
        the customisation screen. We won't overwrite the randomisation button yet, as this
        weirdly uses lots of traits which don't actually do anything and aren't accessible. */
-    Executive.functions.registerPostHook("customCTraits", (args) => {
+    Executive.functions.createRawPostHook("customCTraits", (args) => {
         /* The character array is the first argument to the function. We'll use the undocumented
            API feature to wrap a character without specifying a type, as the arguments don't give
            us the same type of character type as other game functions do. */
@@ -177,5 +177,143 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
             if(traitTimeout) clearTimeout(traitTimeout);
             timeout = setTimeout(traitCallback);
         });
+    });
+
+    /* We also need to add custom traits to the Custom Event Tool. */
+    Executive.functions.createRawPostHook("createCustomEvents", (args) => {
+        const currentEvent = args[0];
+        const editToolsDiv = document.getElementById("custEvEditTools");
+
+        /* Because the custom event creator's organisation is silly, we have to go to lengths
+           to actually modify it properly. */
+        let currentIndexType = "";
+        let currentIndex = 0;
+        for(let elementIndex = 0; elementIndex < editToolsDiv.children.length; elementIndex++){
+            const currentElem = editToolsDiv.children[elementIndex];
+
+            if(currentElem.tagName === "H2"){
+                currentIndexType = currentElem.textContent;
+                currentIndex = 0;
+            } else if(currentElem.tagName === "DIV" && currentElem.className === "custEvSubDivB"){
+                /* We've found either a trigger or an effect. */
+                if(currentIndexType === "Event Triggers"){
+                    /* Now check whether it's a trait-related trigger. */
+                    const targetTrigger = currentEvent.eventTrig[currentIndex];
+                    if(targetTrigger.type === "playerTrait" || targetTrigger.type === "playerNotTrait"){
+                        /* Add our buttons! */
+                        const buttonContainer = currentElem.getElementsByClassName("custEvSubDiv2")[0];
+
+                        customTraits.forEach(traitName => {
+                            let isEnabled = targetTrigger.traits.includes(traitName);
+
+                            const traitToggleButton = document.createElement("button");
+                            traitToggleButton.setAttribute("class", 
+                                (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                            traitToggleButton.textContent = traitName;
+
+                            traitToggleButton.onclick = () => {
+                                playClick();
+
+                                isEnabled = !isEnabled;
+
+                                if(isEnabled) targetTrigger.traits.push(traitName);
+                                if(!isEnabled) targetTrigger.traits.splice(targetTrigger.traits.indexOf(traitName), 1);
+
+                                traitToggleButton.setAttribute("class", 
+                                    (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                            };
+
+                            buttonContainer.appendChild(traitToggleButton);
+                        });
+                    } else if(targetTrigger.type === "targetChar"){
+                        /* The big 'evaluate character' trigger has more to deal with. We have to
+                           handle the case for traits and not having traits. */
+                        const applicableChildren = currentElem.getElementsByClassName("custEvSubDiv2");
+                        for(let currentChildIndex = 0; currentChildIndex < applicableChildren.length; currentChildIndex++){
+                            const currentChild = applicableChildren[currentChildIndex];
+                            const currentChildHeader = currentChild.getElementsByTagName("h4")[0];
+
+                            if(currentChildHeader &&
+                                (currentChildHeader.textContent === "Character Traits"
+                                || currentChildHeader.textContent === "Character Does Not Have Traits")){
+                                /* We've found an applicable segment. */
+                                const doesHave = (currentChildHeader.textContent === "Character Traits");
+
+                                /* Get the next header so that we add our new buttons in before it. */
+                                const bottomHeader = currentChild.getElementsByTagName("h4")[1];
+                                const enabledCheckbox = currentChild.getElementsByTagName("input")[0];
+
+                                const buttonArray = [];
+
+                                customTraits.forEach(traitName => {
+                                    const targetArray = (doesHave) ? targetTrigger.traits : targetTrigger.notTraits;
+                                    let isEnabled = targetArray.includes(traitName);
+        
+                                    const traitToggleButton = document.createElement("button");
+                                    traitToggleButton.setAttribute("class", 
+                                        (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                                    traitToggleButton.setAttribute("style",
+                                        (enabledCheckbox.checked) ? "display: block;" : "display: none;");
+                                    traitToggleButton.textContent = traitName;
+        
+                                    traitToggleButton.onclick = () => {
+                                        playClick();
+        
+                                        isEnabled = !isEnabled;
+        
+                                        if(isEnabled) targetArray.push(traitName);
+                                        if(!isEnabled) targetArray.splice(targetTrigger.traits.indexOf(traitName), 1);
+        
+                                        traitToggleButton.setAttribute("class", 
+                                            (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                                    };
+                                    
+                                    buttonArray.push(traitToggleButton);
+                                    currentChild.insertBefore(traitToggleButton, bottomHeader);
+                                });
+
+                                /* We need to show/hide the buttons whenever the checkbox is toggled. */
+                                enabledCheckbox.addEventListener("click", () => {
+                                    const newStyle = (enabledCheckbox.checked) ? "display: block;" : "display: none;";
+                                    buttonArray.forEach(btn => btn.setAttribute("style", newStyle));
+                                });
+                            }
+                        }
+                    }
+                } else if(currentIndexType === "Event Effects"){
+                    /* Now check whether it's a trait-related effect. */
+                    const targetEffect = currentEvent.effects[currentIndex];
+                    if(targetEffect.type === "addPlayerTrait" || targetEffect.type === "removePlayerTrait"
+                        || targetEffect.type === "addTraitVars" || targetEffect.type === "removeTraitVars"){
+                        /* Add our buttons! */
+                        const buttonContainer = currentElem.getElementsByClassName("custEvSubDiv2")[0];
+
+                        customTraits.forEach(traitName => {
+                            let isEnabled = targetEffect.traits.includes(traitName);
+
+                            const traitToggleButton = document.createElement("button");
+                            traitToggleButton.setAttribute("class", 
+                                (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                            traitToggleButton.textContent = traitName;
+
+                            traitToggleButton.onclick = () => {
+                                playClick();
+
+                                isEnabled = !isEnabled;
+
+                                if(isEnabled) targetEffect.traits.push(traitName);
+                                if(!isEnabled) targetEffect.traits.splice(targetEffect.traits.indexOf(traitName), 1);
+
+                                traitToggleButton.setAttribute("class", 
+                                    (isEnabled) ? "custEvBActive" : "custEvBInactive");
+                            };
+
+                            buttonContainer.appendChild(traitToggleButton);
+                        });
+                    }
+                }
+                currentIndex++;
+            }
+        }
     });
 };

@@ -32,6 +32,7 @@ Executive introduces a basic API to simplify the process of working with the gam
 - `deregisterPreHook(funcName, hookId)` – Deregister a previously registered pre-hook.
 - `deregisterPostHook(funcName, hookId)` – Deregister a previously registered post-hook.
 - `getOriginalFunction(funcName)` – Get the original definition of a game function.
+- `getFunctionOverwritten(funcName)` – Check whether a game function has been overwritten.
 
 ## Executive.styles
 
