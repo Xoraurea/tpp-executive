@@ -27,7 +27,8 @@ let Executive = {
             candidate: 183,
             history: 51,
             staff: 44
-        }
+        },
+        propositions: nw.require("executive/enums/propositions.js")
     },
     symbols: {
         functions: filteredList.filter(entry => (typeof globalThis[entry] === "function")),
@@ -172,7 +173,7 @@ console.log("[Executive] Executive for The Political Process (" + Executive.vers
             /* Undocumented internal function cleared upon mod initialisation.
                Creates a pre-hook to be called after the original form of an internal function executes. */
             if(originalFuncTable[funcName] === undefined){
-                console.error("[Executive] Executive attempted to register raw pre-hook for non-existent internal function (" + funcName + ")");
+                console.error("[Executive] Executive attempted to create raw pre-hook for non-existent internal function (" + funcName + ")");
                 return;
             }
 
@@ -185,8 +186,8 @@ console.log("[Executive] Executive for The Political Process (" + Executive.vers
         createRawPostHook: (funcName, hook) => {
             /* Undocumented internal function cleared upon mod initialisation.
                Creates a post-hook to be called after the original form of an internal function executes. */
-               if(originalFuncTable[funcName] === undefined){
-                console.error("[Executive] Executive attempted to register raw pre-hook for non-existent internal function (" + funcName + ")");
+            if(originalFuncTable[funcName] === undefined){
+                console.error("[Executive] Executive attempted to create raw pre-hook for non-existent internal function (" + funcName + ")");
                 return;
             }
 
@@ -197,6 +198,17 @@ console.log("[Executive] Executive for The Political Process (" + Executive.vers
                 return rtnVal;
             }
         },
+        insertRawReplacement: (funcName, replacement) => {
+            /* Undocumented internal function cleared upon mod initialisation.
+               Inserts a replacement function in place of the original form of an internal function. Will overwrite
+               any raw pre/post-hooks. */
+            if(originalFuncTable[funcName] === undefined){
+                console.error("[Executive] Executive attempted to insert raw replacement for non-existent internal function (" + funcName + ")");
+                return;
+            }
+
+            originalFuncTable[funcName] = replacement;
+        }
     };
 
     /* We iterate over every new function defined. */

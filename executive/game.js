@@ -2,6 +2,7 @@
    Implements helper functions to influence the current game state */
 
 const { updateTooltip } = require("../modFiles/better-maps/tooltip");
+const { CustomProposition } = require("./game/propositions.js");
 
 {
     const game = {
@@ -315,5 +316,234 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                 currentIndex++;
             }
         }
+    });
+
+    /* We want to allow mods to define custom propositions for laws. */
+    game.CustomProposition = CustomProposition;
+    game.customPropositions = {};
+
+    const propositionArrays = {
+        city: [],
+        state: [],
+        nation: []
+    };
+
+    Object.keys(propositionArrays).forEach(propLevel => {
+        Object.defineProperty(game.customPropositions, propLevel, {
+            get: () => {
+                const returnArray = [];
+                propositionArrays[propLevel].forEach(custProp => {
+                    returnArray.push(Object.assign({}, custProp));
+                });
+                return returnArray;
+            }
+        });
+    });
+
+    /* Support for propositions is not currently included due to breaking bugs. */
+    /*game.registerProposition = (propObject, propLevel, startState) => {
+        if(!(propObject instanceof CustomProposition)) throw new Error("Attempted to register non-CustomProposition as proposition");
+        propositionArrays[propLevel].push(propObject);*/
+
+        /* We also now need to add properties at the applicable government level for
+           the proposition. */
+        /*switch(propObject.type){
+            case Executive.enums.propositions.type.trueFalse:
+                if(propLevel === "nation"){
+                    nationStats[propObject.id] = startState;
+                } else if(propLevel === "state"){
+                    Executive.data.states.allStates.forEach(stateObj => {
+                        stateObj[propObject.id] = startState;
+                    });
+                } else if(propLevel === "city"){
+                    cityStats[propObject.id] = startState;
+                } else throw new Error("Undefined level of government for registered proposition");
+                break;
+            default:
+                throw new Error("Unimplemented type of proposition registered");
+                break;
+        }
+    }*/
+
+    /* We need to map categories to buttons in the legislation editor. */
+    const categoryButtonText = {
+        "Crime": "Crime",
+        "Education": "Education",
+        "Elections": "Elect",
+        "Environment": "Environment",
+        "Guns": "Guns",
+        "Health": "Health",
+        "Immigration": "Immigration",
+        "Miscellaneous": "Misc",
+        "Poverty": "Poverty",
+        "Social Security": "Social Security",
+        "Taxes": "Tax",
+        "Veterans": "Veteran",
+        "Senate Rules": "senateRules"
+    };
+
+    let currentGovLevel = null;
+
+    Executive.functions.createRawPreHook("complexBillMenu", (args) => {
+        currentGovLevel = args[0].district;
+    });
+
+    /* We need to replace various functions the game uses relating to
+       propositions. */
+    const originalCheckAllowProposal = Executive.functions.getOriginalFunction("checkAllowProposal");
+    Executive.functions.insertRawReplacement("checkAllowProposal", (propId, propObject) => {
+        let propArray = propositionArrays[currentGovLevel];
+
+        if(propArray){
+            const targetProp = propArray.find(candProp => (candProp.id === propId));
+            if(targetProp){
+                return true;
+            } else return originalCheckAllowProposal(propId, propObject);
+        } else return originalCheckAllowProposal(propId, propObject);
+    });
+
+    const originalReturnPropDesc = Executive.functions.getOriginalFunction("returnPropDesc");
+    Executive.functions.insertRawReplacement("returnPropDesc", (propId, propLevel) => {
+        let propArray = null;
+
+        /* TODO: Finish this! */
+        switch(propLevel){
+            case "usHouse":
+                propArray = propositionArrays.nation
+                break;
+        }
+
+        if(propArray){
+            const targetProp = propArray.find(candProp => (candProp.id === propId));
+            if(targetProp){
+                return targetProp.description;
+            } else return originalReturnPropDesc(propId, propLevel);
+        } else return originalReturnPropDesc(propId, propLevel);
+    });
+
+    /* We need to hook the legislation creation menu to add custom laws.
+       Hopefully there'll be a better way to do this in the future. */
+    Executive.functions.createRawPostHook("complexBillMenu", (args) => {
+        const lawObject = args[0];
+
+        /* First, we don't have access to the actual array of added propositions.
+           There's a hacky way to get around this – the game *does* pass this to
+           the support analysis UI, so we just fake a click on the button that
+           adds this and then immediately remove the added UI. */
+        let hookId = null;
+
+        /* We'll temporarily clear the playClick function so the player doesn't
+           hear a click. */
+        const oldPlayClick = playClick;
+        playClick = () => {};
+
+        hookId = Executive.functions.registerPostHook("billSupportMenu", (suppArgs) => {
+            Executive.functions.deregisterPostHook("billSupportMenu", hookId);
+            playClick = oldPlayClick;
+
+            const supportDiv = document.getElementById("billSupMenuDiv");
+            if(supportDiv) supportDiv.remove();
+
+            /* Now we do our extra stuff. */
+            const newPropArray = suppArgs[1];
+            const addProposalButton = document.getElementById("compBillAddPropB");
+
+            addProposalButton.addEventListener("click", () => {
+                /* We can assume the UI is done being made now. */
+                const proposalTypeButtons = document.getElementsByClassName("selBillPropCatB");
+
+                for(let buttonIndex = 0; buttonIndex < proposalTypeButtons.length; buttonIndex++){
+                    const typeButton = proposalTypeButtons[buttonIndex];
+                    const targetCategory = categoryButtonText[typeButton.textContent];
+                    if(targetCategory !== undefined){
+                        typeButton.addEventListener("click", () => {
+                            const containerDiv = document.getElementById("selBillPropInner");
+
+                            /* Add options for every proposition added. */
+                            const propositionArray = propositionArrays[lawObject.district];
+                            propositionArray.forEach(custProp => {
+                                if(custProp.category !== targetCategory) return;
+
+                                const propDiv = document.createElement("div");
+                                propDiv.setAttribute("class", "selBillPropDiv");
+                                containerDiv.appendChild(propDiv);
+
+                                /* Add the title proposition. */
+                                const titleDiv = document.createElement("div")
+                                titleDiv.setAttribute("class", "selBillPropTitleD");
+                                propDiv.appendChild(titleDiv);
+
+                                const titleH3 = document.createElement("h3");
+                                titleH3.setAttribute("class", "selBillPropTitleH3");
+                                titleH3.textContent = custProp.title;
+                                titleDiv.appendChild(titleH3);
+
+                                /* This is ugly and hacky. */
+                                const isActive = eval(lawObject.district + "Stats")[custProp.id];
+
+                                const activeH3 = document.createElement("h3");
+                                activeH3.setAttribute("class", `selBillPropActH3${isActive ? "A" : "B"}`);
+                                activeH3.textContent = (isActive ? "Active" : "Inactive");
+                                titleDiv.appendChild(activeH3);
+
+                                /* Add the description of the proposition. */
+                                const descDiv = document.createElement("div");
+                                descDiv.setAttribute("class", "selBillPropDescD");
+                                propDiv.appendChild(descDiv);
+
+                                const descParagraph = document.createElement("p");
+                                descParagraph.setAttribute("class", "selBillPropDescP");
+                                descDiv.appendChild(descParagraph);
+
+                                const descriptionSpan = document.createElement("span");
+                                descriptionSpan.setAttribute("style", "font-weight:bold");
+                                descriptionSpan.textContent = "Description";
+                                descParagraph.appendChild(descriptionSpan);
+
+                                descParagraph.appendChild(document.createTextNode(`: ${custProp.description}`));
+                                descParagraph.appendChild(document.createElement("br"));
+
+                                const effectsSpan = document.createElement("span");
+                                effectsSpan.setAttribute("style", "font-weight:bold");
+                                effectsSpan.textContent = "Effects";
+                                descParagraph.appendChild(effectsSpan);
+
+                                descParagraph.appendChild(document.createTextNode(`: `));
+
+                                /* Add the select button. */
+                                const selectDiv = document.createElement("div");
+                                selectDiv.setAttribute("class", "selBillPropSelD");
+                                propDiv.appendChild(selectDiv);
+
+                                const selectButton = document.createElement("button");
+                                selectButton.setAttribute("class", "selBillPropSelB");
+                                selectButton.textContent = "Select";
+                                selectDiv.appendChild(selectButton);
+
+                                selectButton.onclick = () => {
+                                    /* This is the meat of the whole section. */
+                                    playClick();
+
+                                    const newPropElement = {
+                                        cat: custProp.category,
+                                        id: custProp.id,
+                                        policy: isActive,
+                                        title: custProp.title
+                                    };
+
+                                    newPropArray.push(newPropElement);
+                                    document.getElementById("selBillPropMenu").remove();
+                                };
+                            });
+                        });
+                    }
+                }
+            });
+        });
+
+        const sidebarDiv = document.getElementById("compBillEffInfoD");
+        const supportButton = sidebarDiv.getElementsByClassName("compBillEffB")[0];
+
+        supportButton.click();
     });
 };
