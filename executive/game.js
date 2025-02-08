@@ -323,6 +323,7 @@ const { CustomProposition } = require("./game/propositions.js");
     game.customPropositions = {};
 
     const propositionArrays = {
+        school: [],
         city: [],
         state: [],
         nation: []
@@ -341,13 +342,13 @@ const { CustomProposition } = require("./game/propositions.js");
     });
 
     /* Support for propositions is not currently included due to breaking bugs. */
-    /*game.registerProposition = (propObject, propLevel, startState) => {
+    game.registerProposition = (propObject, propLevel, startState) => {
         if(!(propObject instanceof CustomProposition)) throw new Error("Attempted to register non-CustomProposition as proposition");
-        propositionArrays[propLevel].push(propObject);*/
+        propositionArrays[propLevel].push(propObject);
 
         /* We also now need to add properties at the applicable government level for
            the proposition. */
-        /*switch(propObject.type){
+        switch(propObject.type){
             case Executive.enums.propositions.type.trueFalse:
                 if(propLevel === "nation"){
                     nationStats[propObject.id] = startState;
@@ -363,7 +364,7 @@ const { CustomProposition } = require("./game/propositions.js");
                 throw new Error("Unimplemented type of proposition registered");
                 break;
         }
-    }*/
+    };
 
     /* We need to map categories to buttons in the legislation editor. */
     const categoryButtonText = {
@@ -395,7 +396,8 @@ const { CustomProposition } = require("./game/propositions.js");
         let propArray = propositionArrays[currentGovLevel];
 
         if(propArray){
-            const targetProp = propArray.find(candProp => (candProp.id === propId));
+            const targetId = (propObject.executiveId !== undefined) ? propObject.executiveId : propId;
+            const targetProp = propArray.find(candProp => (candProp.id === targetId));
             if(targetProp){
                 return true;
             } else return originalCheckAllowProposal(propId, propObject);
@@ -408,7 +410,7 @@ const { CustomProposition } = require("./game/propositions.js");
 
         /* TODO: Finish this! */
         switch(propLevel){
-            case "usHouse":
+            case "usHouse", "usSenate":
                 propArray = propositionArrays.nation
                 break;
         }
@@ -437,8 +439,13 @@ const { CustomProposition } = require("./game/propositions.js");
         const oldPlayClick = playClick;
         playClick = () => {};
 
-        hookId = Executive.functions.registerPostHook("billSupportMenu", (suppArgs) => {
-            Executive.functions.deregisterPostHook("billSupportMenu", hookId);
+        /* The function called to open the bill support UI varies depending on
+           the level of government. */
+        const supportMenuFunc = (lawObject.district === "state" || lawObject.district === "nation") ? "billSupportMenu"
+            : "billSupportMenuLocal";
+
+        hookId = Executive.functions.registerPostHook(supportMenuFunc, (suppArgs) => {
+            Executive.functions.deregisterPostHook(supportMenuFunc, hookId);
             playClick = oldPlayClick;
 
             const supportDiv = document.getElementById("billSupMenuDiv");
@@ -446,6 +453,12 @@ const { CustomProposition } = require("./game/propositions.js");
 
             /* Now we do our extra stuff. */
             const newPropArray = suppArgs[1];
+
+            /* If our list of propositions already has elements in it, we need
+               to fix the UI widgets that have already been added.
+               TODO: Do this! */
+            
+
             const addProposalButton = document.getElementById("compBillAddPropB");
 
             addProposalButton.addEventListener("click", () => {
@@ -524,9 +537,12 @@ const { CustomProposition } = require("./game/propositions.js");
                                     /* This is the meat of the whole section. */
                                     playClick();
 
+                                    /* We need to give the law a dummy ID for the legislation UI. We'll
+                                       change it when the legislation is submitted. */
                                     const newPropElement = {
                                         cat: custProp.category,
-                                        id: custProp.id,
+                                        id: "stateAbortion",
+                                        executiveId: custProp.id,
                                         policy: isActive,
                                         title: custProp.title
                                     };
@@ -545,5 +561,130 @@ const { CustomProposition } = require("./game/propositions.js");
         const supportButton = sidebarDiv.getElementsByClassName("compBillEffB")[0];
 
         supportButton.click();
+    });
+
+    /* *God*, this is messy. Now we have to overwrite the summary function. */
+    const originalCalcComplexSummary = Executive.functions.getOriginalFunction("calcComplexSummary");
+
+    Executive.functions.insertRawReplacement("calcComplexSummary", (billObject, propArray, billLevel) => {
+        const summaryArray = originalCalcComplexSummary(billObject, propArray, billLevel);
+
+        /* Swap the true ID back in for the fake one and fix summaries. */
+        if(billObject.props){
+            for(let i = 0; i < billObject.props.length; i++){
+                const propObj = billObject.props[i];
+                if(propObj.executiveId) propObj.id = propObj.executiveId;
+                
+                if(billObject.amendProps && billObject.amendProps[i]){
+                    if(billObject.amendProps[i].executiveId) billObject.hProps[i].id = billObject.amendProps[i].executiveId;
+                }
+
+                if(billObject.hProps && billObject.hProps[i]){
+                    if(billObject.hProps[i].executiveId) billObject.hProps[i].id = billObject.hProps[i].executiveId;
+                }
+
+                if(billObject.sProps && billObject.sProps[i]){
+                    if(billObject.sProps[i].executiveId) billObject.sProps[i].id = billObject.sProps[i].executiveId;
+                }
+
+                if(summaryArray[i]){
+                    const summaryObj = summaryArray[i];
+                    const custProp = propositionArrays[billObject.district].find(candProp => candProp.id === propObj.id);
+
+                    if(custProp){
+                        summaryObj.title = custProp.title;
+                        summaryObj.desc = custProp.description;
+                        summaryObj.props = custProp.effectSummaries[propObj.policy];
+                    }
+                }
+            }
+        }
+
+        return summaryArray;
+    });
+
+    /* To allow for our custom propositions to have support scores, we need to
+       overwrite the score handling function. */
+    const originalBillScoreCalc = Executive.functions.getOriginalFunction("billScoreCalc");
+
+    Executive.functions.insertRawReplacement("billScoreCalc", (billObj, propArray, character, arg3, rtnType, billLevel) => {
+        const wrappedChar = Executive.data.characters.wrapCharacter(character, "candidate");
+
+        const rtnItems = [];
+        const passAlongProps = [];
+
+        let rtnTotal = 0;
+
+        propArray.forEach(propObj => {
+            let targetId = (propObj.executiveId !== undefined) ? propObj.executiveId : propObj.id;
+            const custProp = propositionArrays[billLevel].find(candProp => (candProp.id === targetId));
+
+            let targetDistrictStats = null;
+
+            if(billLevel === "school") targetDistrictStats = schoolBoardStats;
+            else targetDistrictStats = eval(billLevel + "Stats");
+
+            if(custProp){
+                /* Now we evaluate against each score factor and add a return item. */
+                if(targetDistrictStats[custProp.id] !== propObj.policy) custProp.scoreModifiers.forEach(scoreModifier => {
+                    /* The scores are for the case where the policy is made true. If the policy
+                       is made false, people will logically hold the opposite position. */
+                    const calcImpact = ((scoreModifier.type !== "custom") ? scoreModifier.impact : 0)
+                        * ((propObj.policy) ? 1 : -1);
+
+                    switch(scoreModifier.type){
+                        case "policy":
+                            const charPolicyPosition = wrappedChar.policyPositions[scoreModifier.policy];
+                            if(charPolicyPosition === scoreModifier.value){
+                                rtnItems.push({
+                                    id: custProp.title,
+                                    desc: scoreModifier.explanation,
+                                    score: calcImpact
+                                });
+                                rtnTotal += calcImpact;
+                            }
+                            break;
+                        case "ideology":
+                            const charIdeologyPosition = wrappedChar[scoreModifier.ideology];
+                            if(charIdeologyPosition === scoreModifier.value){
+                                rtnItems.push({
+                                    id: custProp.title,
+                                    desc: scoreModifier.explanation,
+                                    score: calcImpact
+                                });
+                                rtnTotal += calcImpact;
+                            }
+                            break;
+                        case "trait":
+                            if(wrappedChar.traits.includes(scoreModifier.value)){
+                                rtnItems.push({
+                                    id: custProp.title,
+                                    desc: scoreModifier.explanation,
+                                    score: calcImpact
+                                });
+                                rtnTotal += calcImpact;
+                            }
+                            break;
+                        case "custom":
+                            const resolverRtn = scoreModifier.resolver(wrappedChar, propObj, billLevel);
+                            if(resolverRtn !== null){
+                                const resolvedImpact = resolverRtn.impact * ((propObj.policy) ? 1 : -1);
+                                rtnItems.push({
+                                    id: custProp.title,
+                                    desc: resolverRtn.explanation,
+                                    score: resolvedImpact
+                                });
+                                rtnTotal += resolvedImpact;
+                            }
+                            break;
+                    }
+                });
+            } else passAlongProps.push(propObj);
+        });
+
+        const defaultRtn = originalBillScoreCalc(billObj, passAlongProps, character, arg3, rtnType, billLevel);
+        
+        if(rtnType === "analysis") return rtnItems.concat(defaultRtn);
+        else return (rtnTotal + defaultRtn);
     });
 };

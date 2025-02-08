@@ -8,6 +8,8 @@ const path = nw.require("path");
 const postGlobals = Object.keys(globalThis);
 const filteredList = postGlobals.filter(entry => !preGlobals.includes(entry));
 
+const characterEnums = nw.require("executive/enums/character_enums.js");
+
 let Executive = {
     version: {
         major: 0,
@@ -22,12 +24,9 @@ let Executive = {
         registry: {}
     },
     enums: {
-        characterArray: nw.require("executive/enums/character_enums.js"),
-        characterLength: {
-            candidate: 183,
-            history: 51,
-            staff: 44
-        },
+        characterArray: characterEnums.characterArray,
+        characterLength: characterEnums.characterLength,
+        characters: characterEnums.characters,
         propositions: nw.require("executive/enums/propositions.js")
     },
     symbols: {

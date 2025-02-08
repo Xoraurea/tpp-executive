@@ -21,6 +21,7 @@ module.exports = {
         senateRules: "ussRules"
     },
     level: {
+        school: "school",
         city: "city",
         state: "state",
         national: "nation"

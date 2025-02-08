@@ -88,6 +88,6 @@ The `Executive.game` API implements a range of functions to influence the curren
 
 ### registerTrait(traitName : string)
 
-`registerTrait` adds a trait with the name `traitName` to the game, allowing the player to add it to any character via the character customisation screen. These traits will not currently be picked when using the Randomize button and will not automatically appear in the game's Custom Event Tool for triggers.
+`registerTrait` adds a trait with the name `traitName` to the game, allowing the player to add it to any character via the character customisation screen and in the triggers and effects of any custom event via the Custom Event Tool. These traits will not currently be picked when using the Randomize button or when the game randomly generates characters.
 
 - `traitName` : string – The name of the trait to be added.
