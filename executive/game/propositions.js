@@ -24,8 +24,8 @@ class CustomProposition {
         this.#internalType = type;
 
         if(type === Executive.enums.propositions.type.trueFalse){
-            this.effectSummaries[true] = "Sets the untitled proposition to true.";
-            this.effectSummaries[false] = "Sets the untitled proposition to false.";
+            this.effectSummaries[true] = "Sets the untitled proposition's corresponding law to true.";
+            this.effectSummaries[false] = "Sets the untitled proposition's corresponding law to false.";
         }
     }
 

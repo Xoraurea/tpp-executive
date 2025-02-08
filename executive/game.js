@@ -392,16 +392,20 @@ const { CustomProposition } = require("./game/propositions.js");
     /* We need to replace various functions the game uses relating to
        propositions. */
     const originalCheckAllowProposal = Executive.functions.getOriginalFunction("checkAllowProposal");
-    Executive.functions.insertRawReplacement("checkAllowProposal", (propId, propObject) => {
+    Executive.functions.insertRawReplacement("checkAllowProposal", (propId, propObjects) => {
         let propArray = propositionArrays[currentGovLevel];
 
         if(propArray){
-            const targetId = (propObject.executiveId !== undefined) ? propObject.executiveId : propId;
+            const targetId = /*(propObject.executiveId !== undefined) ? propObject.executiveId :*/ propId;
             const targetProp = propArray.find(candProp => (candProp.id === targetId));
             if(targetProp){
                 return true;
-            } else return originalCheckAllowProposal(propId, propObject);
-        } else return originalCheckAllowProposal(propId, propObject);
+            } else if(propId === "stateAbortion") {
+                /* We use stateAbortion as a dummy ID, so we need to catch real attempts to add
+                   it and make sure they don't collide with our custom propositions. */
+                return originalCheckAllowProposal(propId, propObjects.filter(propObj => (propObj.executiveId === undefined)));
+            } else return originalCheckAllowProposal(propId, propObjects);
+        } else return originalCheckAllowProposal(propId, propObjects);
     });
 
     const originalReturnPropDesc = Executive.functions.getOriginalFunction("returnPropDesc");
@@ -422,6 +426,78 @@ const { CustomProposition } = require("./game/propositions.js");
             } else return originalReturnPropDesc(propId, propLevel);
         } else return originalReturnPropDesc(propId, propLevel);
     });
+
+    /* For now, we'll just ignore any custom propositions when the
+       player looks at testimony. */
+    const originalCalcComplexTestimony = Executive.functions.getOriginalFunction("calcComplexTestimony");
+    Executive.functions.insertRawReplacement("calcComplexTestimony", (billObj, propArray) => {
+        return originalCalcComplexTestimony(billObj, propArray.filter(propObj => (propArray.executiveId === undefined)));
+    });
+
+    /* Create the contents of the proposition widgets seen in the
+       legislation menu. */
+    const generatePropDivContents = (propDiv, propObj, custProp, propArray) => {
+        /* Generate the title row. */
+        const topDiv = document.createElement("div");
+        topDiv.setAttribute("class", "propMainTopDiv");
+        propDiv.appendChild(topDiv);
+
+        const titleHeader = document.createElement("h2");
+        titleHeader.setAttribute("class", "propMainH2");
+        titleHeader.textContent = propObj.title;
+        topDiv.appendChild(titleHeader);
+
+        const removeButton = document.createElement("button");
+        removeButton.setAttribute("class", "propMainXB");
+        removeButton.textContent = "X";
+        topDiv.appendChild(removeButton);
+
+        removeButton.onclick = () => {
+            playClick();
+            propDiv.remove();
+            propArray.splice(propArray.indexOf(propObj), 1);
+        };
+
+        const infoButton = document.createElement("button");
+        infoButton.setAttribute("class", "propMainInfoB");
+        infoButton.setAttribute("title", custProp.description);
+        infoButton.textContent = "i";
+        topDiv.appendChild(infoButton);
+
+        infoButton.onclick = () => {
+            playClick();
+            alertFunc(custProp.description);
+        };
+
+        /* Generate the policy controls. */
+        const innerDiv = document.createElement("div");
+        innerDiv.setAttribute("class", "propMainInner");
+        propDiv.appendChild(innerDiv);
+
+        const statusDiv = document.createElement("div");
+        statusDiv.setAttribute("class", "legisStatusDiv");
+        innerDiv.appendChild(statusDiv);
+
+        const trueButton = document.createElement("button");
+        trueButton.setAttribute("class", `budgetTrue${propObj.policy ? "Active" : ""}`);
+        trueButton.textContent = "True";
+        statusDiv.appendChild(trueButton);
+
+        const falseButton = document.createElement("button");
+        falseButton.setAttribute("class", `budgetFalse${propObj.policy ? "" : "Active"}`);
+        falseButton.textContent = "False";
+        statusDiv.appendChild(falseButton);
+
+        const genericStatusButtonClick = (newStatus) => () => {
+            playClick();
+            propObj.policy = newStatus;
+            trueButton.setAttribute("class", `budgetTrue${propObj.policy ? "Active" : ""}`);
+            falseButton.setAttribute("class", `budgetFalse${propObj.policy ? "" : "Active"}`);
+        };
+
+        trueButton.onclick = genericStatusButtonClick(true);
+        falseButton.onclick = genericStatusButtonClick(false);
+    };
 
     /* We need to hook the legislation creation menu to add custom laws.
        Hopefully there'll be a better way to do this in the future. */
@@ -455,9 +531,22 @@ const { CustomProposition } = require("./game/propositions.js");
             const newPropArray = suppArgs[1];
 
             /* If our list of propositions already has elements in it, we need
-               to fix the UI widgets that have already been added.
-               TODO: Do this! */
-            
+               to fix the UI widgets that have already been added. */
+            newPropArray.forEach(propObj => {
+                if(propObj.executiveId){
+                    const propIndex = newPropArray.indexOf(propObj);
+                    const propDiv = document.getElementById(`propMainDiv${propIndex}`);
+
+                    const custProp = propositionArrays[lawObject.district].find(candProp => (candProp.id === propObj.executiveId));
+
+                    /* There'll always be two elements. */
+                    propDiv.lastChild.remove();
+                    propDiv.lastChild.remove();
+
+                    /* Now add the new contents. */
+                    generatePropDivContents(propDiv, propObj, custProp, newPropArray);
+                }
+            });
 
             const addProposalButton = document.getElementById("compBillAddPropB");
 
@@ -537,6 +626,16 @@ const { CustomProposition } = require("./game/propositions.js");
                                     /* This is the meat of the whole section. */
                                     playClick();
 
+                                    /* First, check if a proposal with this ID exists. */
+                                    for(let i = 0; i < newPropArray.length; i++){
+                                        if(newPropArray[i].executiveId){
+                                            if(newPropArray[i].executiveId === custProp.id){
+                                                alertFunc("This proposal is incompatible with other proposals in the bill. It cannot be added until the incompatible proposals have been removed.");
+                                                return;
+                                            }
+                                        }
+                                    }
+
                                     /* We need to give the law a dummy ID for the legislation UI. We'll
                                        change it when the legislation is submitted. */
                                     const newPropElement = {
@@ -547,7 +646,18 @@ const { CustomProposition } = require("./game/propositions.js");
                                         title: custProp.title
                                     };
 
-                                    newPropArray.push(newPropElement);
+                                    const newIndex = newPropArray.push(newPropElement);
+                                    const propContainerDiv = document.getElementById("compBillPropMenu");
+
+                                    /* Now create the widget to control the proposition. */
+                                    const propMainDiv = document.createElement("div");
+                                    propMainDiv.setAttribute("id", `propMainDiv${newIndex}`);
+                                    propMainDiv.setAttribute("class", "propMainDiv");
+                                    propContainerDiv.appendChild(propMainDiv);
+
+                                    generatePropDivContents(propMainDiv, newPropElement, custProp, newPropArray);
+
+                                    /* Finally, go back to the main menu. */
                                     document.getElementById("selBillPropMenu").remove();
                                 };
                             });
