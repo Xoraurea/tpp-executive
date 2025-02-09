@@ -1,6 +1,8 @@
 /* tpp-executive/executive/classes.js
    Common classes used across Executive */
 
+const { type } = require("./enums/propositions");
+
 {
     const customPropositionScope = new WeakMap();
 
@@ -23,6 +25,7 @@
         }
     
         constructor(propositionId, type){
+            /* Create the private scope for the object. */
             customPropositionScope.set(this, {
                 internalId: propositionId + "_customLaw",
                 internalType: type,
@@ -93,7 +96,75 @@
         }
     }
 
+    const bindableEventScope = new WeakMap();
+
+    /* We want to have events which mods can bind to and which get fired
+       by Executive. */
+    class BindableEvent {
+        constructor(eventName) {
+            if(typeof eventName !== "string") throw new Error("Non-string is invalid name for BindableEvent");
+
+            /* Create the private scope for the object. */
+            bindableEventScope.set(this, {
+                boundFunctions: [],
+                name: eventName
+            });
+
+            return {
+                fire: (...args) => {
+                    /* We want an event handler to be able to disconnect itself
+                       for convenience purposes. */
+                    const disconnectingFuncs = [];
+                    const privateScope = bindableEventScope.get(this);
+
+                    privateScope.boundFunctions.forEach(boundFunc => {
+                        const eventObj = {
+                            baseEvent: this,
+                            deregister: () => {
+                                disconnectingFuncs.push(boundFunc);
+                            }
+                        };
+
+                        boundFunc(eventObj, ...args);
+                    });
+
+                    /* Now disconnect the functions. */
+                    disconnectingFuncs.forEach(dcFunc => {
+                        privateScope.boundFunctions.splice(privateScope.boundFunctions.indexOf(dcFunc), 1);
+                    });
+                }
+            };
+        }
+
+        get name(){
+            return bindableEventScope.get(this).name;
+        }
+
+        registerListener(listener){
+            const privateScope = bindableEventScope.get(this);
+            if(typeof listener !== "function") throw new Error(`Attempted to bind non-function to event ${privateScope.name}`);
+
+            privateScope.boundFunctions.push(listener);
+            return {
+                deregister: () => {
+                    privateScope.boundFunctions.splice(privateScope.boundFunctions.indexOf(listener), 1);
+                }
+            };
+        }
+
+        deregisterListener(listener){
+            const privateScope = bindableEventScope.get(this);
+            if(typeof listener !== "function") throw new Error(`Attempted to unbind non-function from event ${privateScope.name}`);
+
+            const funcIndex = privateScope.boundFunctions.indexOf(listener);
+            if(privateScope.boundFunctions[funcIndex]){
+                privateScope.boundFunctions.splice(funcIndex, 1);
+            } else throw new Error(`Attempted to unbind function not bound to event ${privateScope.name}`);
+        }
+    };
+
     module.exports = {
-        CustomProposition
+        CustomProposition,
+        BindableEvent
     };
 };
