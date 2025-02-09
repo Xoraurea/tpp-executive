@@ -2,7 +2,6 @@
    Implements helper functions to influence the current game state */
 
 const { updateTooltip } = require("../modFiles/better-maps/tooltip");
-const { CustomProposition } = require("./game/propositions.js");
 
 {
     const game = {
@@ -319,7 +318,6 @@ const { CustomProposition } = require("./game/propositions.js");
     });
 
     /* We want to allow mods to define custom propositions for laws. */
-    game.CustomProposition = CustomProposition;
     game.customPropositions = {};
 
     const propositionArrays = {
@@ -343,26 +341,30 @@ const { CustomProposition } = require("./game/propositions.js");
 
     /* Support for propositions is not currently included due to breaking bugs. */
     game.registerProposition = (propObject, propLevel, startState) => {
-        if(!(propObject instanceof CustomProposition)) throw new Error("Attempted to register non-CustomProposition as proposition");
+        if(!(propObject instanceof Executive.classes.CustomProposition)) throw new Error("Attempted to register non-CustomProposition as proposition");
+        if(propositionArrays[propLevel].find(candProp => (candProp.id === propObject.id))) throw new Error(`Attempted to register proposition with conflicting ID (${propObject.id})`)
         propositionArrays[propLevel].push(propObject);
 
         /* We also now need to add properties at the applicable government level for
-           the proposition. */
-        switch(propObject.type){
-            case Executive.enums.propositions.type.trueFalse:
-                if(propLevel === "nation"){
-                    nationStats[propObject.id] = startState;
-                } else if(propLevel === "state"){
-                    Executive.data.states.allStates.forEach(stateObj => {
-                        stateObj[propObject.id] = startState;
-                    });
-                } else if(propLevel === "city"){
-                    cityStats[propObject.id] = startState;
-                } else throw new Error("Undefined level of government for registered proposition");
-                break;
-            default:
-                throw new Error("Unimplemented type of proposition registered");
-                break;
+           the proposition if the game is loaded. */
+        if(gameLoaded){
+            console.warn(`[Executive] Proposition ${propObject.id} was registered while a game is loaded. This is inadvisable; consider moving proposition registration to the init stage.`);
+            switch(propObject.type){
+                case Executive.enums.propositions.type.trueFalse:
+                    if(propLevel === "nation"){
+                        nationStats[propObject.id] = startState;
+                    } else if(propLevel === "state"){
+                        Executive.data.states.allStates.forEach(stateObj => {
+                            stateObj[propObject.id] = startState;
+                        });
+                    } else if(propLevel === "city"){
+                        cityStats[propObject.id] = startState;
+                    } else throw new Error("Undefined level of government for registered proposition");
+                    break;
+                default:
+                    throw new Error("Unimplemented type of proposition registered");
+                    break;
+            }
         }
     };
 
@@ -796,5 +798,20 @@ const { CustomProposition } = require("./game/propositions.js");
         
         if(rtnType === "analysis") return rtnItems.concat(defaultRtn);
         else return (rtnTotal + defaultRtn);
+    });
+
+    /* We need to ensure that the property for any custom proposition is set
+       in the given level of government whenever a law is passed. */
+    Executive.functions.registerPostHook("updateComplexBillLaws", (args) => {
+        const lawObject = args[0];
+
+        lawObject.amendProps.forEach(lawProp => {
+            const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
+            if(custProp){
+                const districtStats = (lawObject.district === "school") ? schoolBoardStats
+                    : eval(`${lawObject.district}Stats`);
+                districtStats[lawProp.id] = lawProp.policy;
+            }
+        });
     });
 };

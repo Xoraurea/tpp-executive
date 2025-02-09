@@ -29,6 +29,7 @@ let Executive = {
         characters: characterEnums.characters,
         propositions: nw.require("executive/enums/propositions.js")
     },
+    classes: nw.require("executive/classes.js"),
     symbols: {
         functions: filteredList.filter(entry => (typeof globalThis[entry] === "function")),
         vars: filteredList.filter(entry => (typeof globalThis[entry] !== "function"))
