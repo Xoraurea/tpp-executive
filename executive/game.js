@@ -96,10 +96,12 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
     /* We want to expose a property so mod developers are aware of whether the player is in a loaded
        game. This is actually very simple to implement – as exiting to the main menu prompts an entire
        reload of the game for some reason, we just need to set true whenever a save is loaded. */
+    game.onGameLoad = new Executive.classes.BindableEvent("ExecutiveOnGameLoad");
     let gameLoaded = false;
 
     const setLoaded = () => {
         gameLoaded = true;
+        game.onGameLoad.fire();
     };
 
     Executive.functions.createRawPostHook("loadFunction", setLoaded);
@@ -339,10 +341,11 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
         });
     });
 
-    /* Support for propositions is not currently included due to breaking bugs. */
     game.registerProposition = (propObject, propLevel, startState) => {
         if(!(propObject instanceof Executive.classes.CustomProposition)) throw new Error("Attempted to register non-CustomProposition as proposition");
         if(propositionArrays[propLevel].find(candProp => (candProp.id === propObject.id))) throw new Error(`Attempted to register proposition with conflicting ID (${propObject.id})`)
+        
+        propObject.startState = startState;
         propositionArrays[propLevel].push(propObject);
 
         /* We also now need to add properties at the applicable government level for
@@ -367,6 +370,21 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
             }
         }
     };
+
+    /* We now need to make sure that every proposition has its prerequisite
+       property in the stats object for its level of government. */
+    game.onGameLoad.registerListener(() => {
+        Object.keys(propositionArrays).forEach(propLevel => {
+            const targetArray = propositionArrays[propLevel];
+            const targetStats = (propLevel === "school") ? schoolBoardStats : eval(`${propLevel}Stats`);
+
+            targetArray.forEach(custProp => {
+                if(targetStats[custProp.id] === undefined){
+                    targetStats[custProp.id] = custProp.startState;
+                }
+            });
+        });
+    });
 
     /* We need to map categories to buttons in the legislation editor. */
     const categoryButtonText = {
@@ -811,6 +829,9 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                 const districtStats = (lawObject.district === "school") ? schoolBoardStats
                     : eval(`${lawObject.district}Stats`);
                 districtStats[lawProp.id] = lawProp.policy;
+
+                /* Now fire the event for the proposition being passed. */
+                custProp.onPassage.fire(lawProp, lawObject);
             }
         });
     });

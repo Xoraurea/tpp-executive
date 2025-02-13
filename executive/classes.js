@@ -12,9 +12,11 @@ const { type } = require("./enums/propositions");
         description = "This is an untitled custom proposition.";
         category = Executive.enums.propositions.category.miscellaneous;
         
-        partyImpact = null;
-    
+        partyImpact = null
         effectSummaries = {};
+
+        /* BindableEvents for stages of the legislative process. */
+        onPassage = new Executive.classes.BindableEvent(`ExecutiveOnPropPassage`);
     
         get id (){
             return customPropositionScope.get(this).internalId;
@@ -109,37 +111,37 @@ const { type } = require("./enums/propositions");
                 boundFunctions: [],
                 name: eventName
             });
-
-            return {
-                fire: (...args) => {
-                    /* We want an event handler to be able to disconnect itself
-                       for convenience purposes. */
-                    const disconnectingFuncs = [];
-                    const privateScope = bindableEventScope.get(this);
-
-                    privateScope.boundFunctions.forEach(boundFunc => {
-                        const eventObj = {
-                            baseEvent: this,
-                            deregister: () => {
-                                disconnectingFuncs.push(boundFunc);
-                            }
-                        };
-
-                        boundFunc(eventObj, ...args);
-                    });
-
-                    /* Now disconnect the functions. */
-                    disconnectingFuncs.forEach(dcFunc => {
-                        privateScope.boundFunctions.splice(privateScope.boundFunctions.indexOf(dcFunc), 1);
-                    });
-                }
-            };
         }
 
         get name(){
             return bindableEventScope.get(this).name;
         }
 
+        fire(...args){
+            /* We want an event handler to be able to disconnect itself
+               for convenience purposes. */
+            const disconnectingFuncs = [];
+            const privateScope = bindableEventScope.get(this);
+
+            privateScope.boundFunctions.forEach(boundFunc => {
+                const eventObj = {
+                    baseEvent: this,
+                    deregister: () => {
+                        disconnectingFuncs.push(boundFunc);
+                    }
+                };
+
+                boundFunc(eventObj, ...args);
+            });
+
+            /* Now disconnect the functions. */
+            disconnectingFuncs.forEach(dcFunc => {
+                privateScope.boundFunctions.splice(privateScope.boundFunctions.indexOf(dcFunc), 1);
+            });
+        }
+
+        /* Register a function to act as an event listener, which will be passed arguments
+           by the function firing the event. */
         registerListener(listener){
             const privateScope = bindableEventScope.get(this);
             if(typeof listener !== "function") throw new Error(`Attempted to bind non-function to event ${privateScope.name}`);
@@ -152,6 +154,7 @@ const { type } = require("./enums/propositions");
             };
         }
 
+        /* Deregister a previously registered event listener function. */
         deregisterListener(listener){
             const privateScope = bindableEventScope.get(this);
             if(typeof listener !== "function") throw new Error(`Attempted to unbind non-function from event ${privateScope.name}`);
