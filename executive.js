@@ -364,6 +364,8 @@ Executive.debug = nw.require("executive/debug.js");
         });
     };
 
+    Executive.styles.onThemeChange = new Executive.classes.BindableEvent("ExecutiveOnThemeChange");
+
     /* For theme-aware styles, we need to listen for changes to the game's normal style tag. */
     const styleListener = new MutationObserver((mutations, observer) => {
         let newThemeState = (themeNode.getAttribute("href") === "cssFiles/darkModeCSS.css") ? true : false;
@@ -375,6 +377,7 @@ Executive.debug = nw.require("executive/debug.js");
                     style.element.setAttribute("href", darkMode ? style.dark : style.light);
                 }
             });
+            Executive.styles.onThemeChange.fire(darkMode);
         }
     });
 

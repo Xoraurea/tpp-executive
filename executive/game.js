@@ -835,4 +835,125 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
             }
         });
     });
+
+    const getBillActive = (billObject) => {
+        /* Every piece of legislation discarded is in an array somewhere,
+           so we can just check to see if our bill is still in there. */
+        if(schoolBoardBills.indexOf(billObject) !== -1) return true;
+        if(cityCouncilBills.indexOf(billObject) !== -1) return true;
+        if(stateHouseBills.indexOf(billObject) !== -1) return true;
+        if(sHouseActiveBills.indexOf(billObject) !== -1) return true;
+        if(stateSenateBills.indexOf(billObject) !== -1) return true;
+        if(sSenateActiveBills.indexOf(billObject) !== -1) return true;
+        if(houseBills.indexOf(billObject) !== -1) return true;
+        if(houseActiveBills.indexOf(billObject) !== -1) return true;
+        if(senateBills.indexOf(billObject) !== -1) return true;
+        if(senateActiveBills.indexOf(billObject) !== -1) return true;
+        return false;
+    };
+
+    /* We want to notify a mod if a bill with a custom proposition is passed
+       or defeated during the legislative process. This allows for stuff like
+       motions to vacate, which would require the bill to be archived after
+       passing the House of Representatives. */
+    Executive.functions.registerPostHook("complexBillVote", (args) => {
+        const lawObject = args[0];
+
+        /* We aren't sure when we'll need to handle the vote conclusion, so
+           we'll make a function for it and call when appropriate. */
+        const handleVoteConclusion = () => {
+            let billActive = getBillActive(lawObject);
+            if(billActive){
+                /* Go through every proposition and check if it's custom. If it is,
+                   fire the appropriate success BindableEvent. */
+                if(args[2] === "House" || args[2] === "Senate"){
+                    lawObject.amendProps.forEach(lawProp => {
+                        const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
+                        if(custProp){
+                            if(args[2] === "House") custProp.onHouseSuccess.fire(lawProp, lawObject);
+                            if(args[3] === "Senate") custProp.onSenateSuccess.fire(lawProp, lawObject);
+                        }
+                    });
+                }
+            } else {
+                /* Go through every proposition and check if it's custom. If it is,
+                   fire the failure BindableEvent. */
+                lawObject.amendProps.forEach(lawProp => {
+                    const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
+                    if(custProp){
+                        custProp.onFailure.fire(lawProp, lawObject);
+                    }
+                });
+            }
+        };
+
+        /* The important criterion here is the fifth argument - this determines
+           whether the player is voting on this law or not. If the player is
+           voting, we have to wait for their vote to be taken before checking
+           for the final result. */
+        if(args[4]){
+            /* The player is voting. We need to hook again and wait for their vote. */
+            let hookId = null;
+            hookId = Executive.functions.registerPostHook("calcComplexAppr", (args2) => {
+                if(lawObject === args2[0]){
+                    /* Immediately deregister our hook. */
+                    Executive.functions.deregisterPostHook("calcComplexAppr", hookId);
+
+                    /* This still isn't late enough for the appropriate arrays to be
+                       updated. We now hook one last time. */
+                    hookId = Executive.functions.registerPostHook("officePage", () => {
+                        Executive.functions.deregisterPostHook("officePage", hookId);
+                        handleVoteConclusion();
+                    });
+                }
+            });
+        } else {
+            /* The player isn't voting. We can handle this immediately. */
+            handleVoteConclusion();
+        }
+    });
+
+    /* Cloture votes are a special case. We need to catch them
+       to fire the proposition failure event. */
+    Executive.functions.registerPostHook("ussClotureVote", (args) => {
+        const lawObject = args[0];
+        /* Every piece of legislation under consideration is in billIsolation, so we
+           can just check to see if our bill is no longer in there. */
+        if(billIsolation.indexOf(lawObject) === -1){
+            /* Go through every proposition and check if it's custom. If it is,
+               fire the failure BindableEvent. */
+            lawObject.amendProps.forEach(lawProp => {
+                const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
+                if(custProp){
+                    custProp.onFailure.fire(lawProp, lawObject);
+                }
+            });
+        }
+    });
+
+    /* TODO check: Handle the special case of a presidential
+       veto. */
+    Executive.functions.registerPostHook("presBillVoteComplex", (args) => {
+        const lawObject = args[0];
+
+        /* We need to get their vote. */
+        let hookId = null;
+        hookId = Executive.functions.registerPostHook("calcComplexAppr", (args2) => {
+            if(lawObject === args2[0]){
+                /* Immediately deregister our hook. */
+                Executive.functions.deregisterPostHook("calcComplexAppr", hookId);
+
+                if(args2[3] === "n"){
+                    /* The president vetoed the bill. Fire the failure event for
+                       every appropriate custom proposition. */
+                    lawObject.amendProps.forEach(lawProp => {
+                        const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
+                        if(custProp){
+                            custProp.onFailure.fire(lawProp, lawObject);
+                        }
+                    });
+                }
+            }
+        });
+    });
 };

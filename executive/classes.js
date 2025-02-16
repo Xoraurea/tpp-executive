@@ -17,6 +17,9 @@ const { type } = require("./enums/propositions");
 
         /* BindableEvents for stages of the legislative process. */
         onPassage = new Executive.classes.BindableEvent(`ExecutiveOnPropPassage`);
+        onFailure = new Executive.classes.BindableEvent(`ExecutiveOnPropFailure`);
+        onHouseSuccess = new Executive.classes.BindableEvent(`ExecutiveOnPropHouseSuccess`);
+        onSenateSuccess = new Executive.classes.BindableEvent(`ExecutiveOnPropSenateSuccess`);
     
         get id (){
             return customPropositionScope.get(this).internalId;
