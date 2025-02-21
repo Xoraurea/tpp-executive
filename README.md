@@ -68,3 +68,14 @@ Creating a mod for The Political Process with Executive is accessible for anyone
 The first step to create a mod is to install the SDK release of nw.js – this allows for use of the Inspector within the game. Navigate to https://dl.nwjs.io and grab the Windows SDK release of nw.js v0.41.2 for x64 – incompatibility of the game's compiled bytecode prevents the use of other versions of nw.js. Once the archive has downloaded, copy and paste its contents over the folder for The Political Process, replacing any files necessary. After doing this, opening The Political Process and right-clicking in-game will provide the `Inspect element` option.
 
 ### Creating a new mod
+
+The first step to creating a new mod is to navigate to the `modFiles` folder in your game folder and clone the template repository for an Executive mod. If you have Git installed on your system, this can be done by running `git clone https://github.com/Xoraurea/tpp-template-mod.git` in the `modFiles` folder. The template mod files will be placed in `tpp-template-mod`, which can be renamed as you wish.
+
+The first file to edit is `manifest.json`. This file tells Executive about your mod.
+
+- `id` should be changed to a unique identifier for your mod.
+- `name`, `description` and `author` are included for the benefit of the mod list and can be set to whatever you like. 
+- `version` describes the semantic version of the mod. Executive uses a mod folder's semantic version to resolve conflicts between mods with equal IDs – the newer version of a mod will always take precedence over the older version. 
+- `required_loader_version` describes the minimum version of Executive required to run the mod. If the version of Executive is lower than the version required by the mod, Executive will refuse to load it.
+
+Your mod is now ready to run. Start the game now – if all has gone well, you should see a dialog saying "Hello, Executive world!". Now, with your `manifest.json` set up, you're free to begin writing code for your mod! Open `main.js` in your editor of choice and begin the [Getting Started](documentation/executive/tutorials/getting-started.md) tutorial.

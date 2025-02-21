@@ -406,14 +406,14 @@ if(!fs.existsSync("modFiles")){
     const checkVersionSupported = (modReqVersion, otherVer) => {
         if(!otherVer) otherVer = Executive.version;
 
-        if(modReqVersion.major < otherVer.major) return 0;
-        if(modReqVersion.major > otherVer.major) return 2;
+        if(modReqVersion.major > otherVer.major) return 0;
+        if(modReqVersion.major < otherVer.major) return 2;
 
-        if(modReqVersion.minor < otherVer.minor) return 0;
-        if(modReqVersion.minor > otherVer.minor) return 2;
+        if(modReqVersion.minor > otherVer.minor) return 0;
+        if(modReqVersion.minor < otherVer.minor) return 2;
 
-        if(modReqVersion.revision < otherVer.revision) return 0;
-        if(modReqVersion.revision > otherVer.revision) return 2;
+        if(modReqVersion.revision > otherVer.revision) return 0;
+        if(modReqVersion.revision < otherVer.revision) return 2;
 
         return 1;
     };
@@ -429,22 +429,7 @@ if(!fs.existsSync("modFiles")){
         let modExports = null;
 
         try {
-            //const modLink = new URL(__dirname + "/modFiles/" + manifest.id + "/main.js");
-            //modLink.searchParams.set("mod-id", manifest.id);
             modExports = require(modPath + "main.js");
-            /* We use JavaScript contexts to allow mods to call the API and get returned values and effects
-               specific to that mod. To achieve this, we need to use the VM module. */
-            /*const newContextObj = Object.assign({}, globalThis);
-            newContextObj["__modId"] = manifest.id;
-            newContextObj["__dirname"] = modPath;
-
-            const newContext = vm.createContext(newContextObj);
-            const setDirScript = `const process = require("process");
-                process.chdir("./modFiles/${manifest.id}");`;
-            (new vm.Script(setDirScript)).runInContext(newContext);
-
-            const scriptContents = fs.readFileSync(modPath + "main.js", "utf8");
-            modExports = (new vm.Script(scriptContents)).runInContext(newContext);*/
         } catch(err) {
             console.error("[Executive] Failed to load mod " + manifest.name + " [" + manifest.id + "]" + " (" + err + ")");
             console.log(err);
@@ -478,9 +463,10 @@ if(!fs.existsSync("modFiles")){
                         manifestObj.description = "No description provided.";
                     }
                     
-                    const compatNum = checkVersionSupported(manifestObj.required_loader_version);
+                    const compatNum = (manifestObj.required_loader_version !== undefined) ? checkVersionSupported(manifestObj.required_loader_version)
+                        : 1;
                     if(compatNum === 0){
-                        console.warn("[Executive] Unable to load mod " + manifestObj.name + " [" + manifestObj.id + "]");
+                        console.warn("[Executive] Unable to load mod " + manifestObj.name + " [" + manifestObj.id + "]; required Executive version too high");
                     } else {
                         loadMod(pathPrefix, manifestObj);
                     }

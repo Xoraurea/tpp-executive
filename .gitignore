@@ -2,9 +2,8 @@ audio/
 binFiles/
 cssFiles/
 locales/
-modFiles/better-maps
-modFiles/party-shifts
-modFiles/event-commander
+modFiles/*
+!modFiles/mod-list
 pnacl/
 swiftshader/
 chromedriver.exe
