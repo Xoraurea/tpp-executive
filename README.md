@@ -24,7 +24,9 @@ Installing Executive is as easy as copying the mod loader's files to your game d
 
 Once you've opened your game folder, download the most recent release of Executive compatible with your game version from the sidebar and extract it wherever you like. The first decimal place of the game version is the most important in determining compatibility – for example, an Executive release targeted at The Political Process 0.307 will likely work with The Political Process 0.31 without major issues.
 
-From the files extracted, copy `executive.js`, the `modFiles` folder and the `executive` folder to the game folder you opened before. Once these files are copied, you can move on to modifying the necessary files to load Executive.
+From the files extracted, copy `executive.js`, the `modFiles` folder and the `executive` folder to the game folder you opened before. If `package.json` and `index.html` are amongst the extracted files, you can copy these too, overwriting the existing versions, and skip to [Installing mods](#installing-mods).
+
+If your download doesn't contain `package.json` and `index.html`, you now need to modify the necessary files to load Executive.
 
 ### Modifying index.html and package.json
 
@@ -67,9 +69,11 @@ Once you're done, save the file and close it. You can now move on to `package.js
 "chromium-args": "--mixed-context",
 ```
 
-Save this file and close it. **You've now successfully installed Executive!** To test your modded copy of the game, open it in Steam – you should see a `Mods` button added to the main menu, and the version string shown in the bottom right should now also contain the Executive version and the number of mods loaded (one, for now).
+Save this file and close it.
 
 ### Installing mods
+
+**You've now successfully installed Executive!** To test your modded copy of the game, open it in Steam – you should see a `Mods` button added to the main menu, and the version string shown in the bottom right should now also contain the Executive version and the number of mods loaded (one, for now).
 
 You're now ready to install mods! Mods are stored as folders in `modFiles`, containing at least a `main.js` and a `manifest.json` file. You can name the containing folder whatever you want, but it'll likely be helpful to name it something specific to the mod it contains. If you'd like some mods to get started with, check out [this](https://github.com/Xoraurea/my-tpp-mods) repository.
 
