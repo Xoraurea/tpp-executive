@@ -1,8 +1,6 @@
 /* tpp-executive - executive/game.js 
    Implements helper functions to influence the current game state */
 
-const { updateTooltip } = require("../modFiles/better-maps/tooltip");
-
 {
     const game = {
         version: version
