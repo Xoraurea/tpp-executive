@@ -1,6 +1,7 @@
 audio/
 binFiles/
 cssFiles/
+documentation/game/*
 locales/
 modFiles/*
 !modFiles/mod-list
