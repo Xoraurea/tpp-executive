@@ -37,10 +37,28 @@ The first file to modify is `index.html`. Open the file in any text editor, and 
 globalThis.preGlobals = Object.keys(globalThis);
 ```
 
+Once you've pasted these lines in, the start of the section should match the following.
+
+```
+<script>
+    { const fs = nw.require('fs');
+      globalThis.preGlobals = Object.keys(globalThis);
+
+      nw.Window.get().evalNWBin(null, 'binFiles/variables.bin');
+```
+
 After pasting these two lines, scroll down to the line containing nothing except `</script>`. Once you're there, paste the following snippet **above** (not below) the `</script>` line.
 
 ```
 nw.Window.get().eval(null, fs.readFileSync("executive.js", "utf-8")); };
+```
+
+Once you've pasted this line in, the end of the section should match the following.
+
+```
+    nw.Window.get().evalNWBin(null, 'binFiles/uiMenus.bin');
+    nw.Window.get().eval(null, fs.readFileSync("executive.js", "utf-8")); };
+</script>
 ```
 
 Once you're done, save the file and close it. You can now move on to `package.json`, which only requires one modification. Find the line containing `"main": "index.html",` and insert a new line below, pasting the following snippet.
