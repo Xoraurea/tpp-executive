@@ -12,8 +12,11 @@ const { type } = require("./enums/propositions");
         description = "This is an untitled custom proposition.";
         category = Executive.enums.propositions.category.miscellaneous;
         
-        partyImpact = null
-        effectSummaries = {};
+        partyImpact = null;
+
+        get effectSummaries (){
+            return customPropositionScope.get(this).internalEffectSummaries;
+        }
 
         /* BindableEvents for stages of the legislative process. */
         onPassage = new Executive.classes.BindableEvent(`ExecutiveOnPropPassage`);
@@ -34,12 +37,15 @@ const { type } = require("./enums/propositions");
             customPropositionScope.set(this, {
                 internalId: propositionId + "_customLaw",
                 internalType: type,
-                internalScoreModifiers: []
+                internalScoreModifiers: [],
+                internalEffectSummaries: {}
             });
     
             if(type === Executive.enums.propositions.type.trueFalse){
                 this.effectSummaries[true] = "Sets the untitled proposition's corresponding law to true.";
                 this.effectSummaries[false] = "Sets the untitled proposition's corresponding law to false.";
+            } else if(type === Executive.enums.propositions.type.motion) {
+                this.effectSummaries[true] = "Passes the untitled proposition's motion.";
             }
         }
     
@@ -51,10 +57,10 @@ const { type } = require("./enums/propositions");
             return returnArray;
         }
     
-        addPolicyScoreModifier(policyPosition, targetValue, scoreImpact, matchedExplanation, unmatchedExplanation){
+        addPolicyScoreModifier(policy, targetValue, scoreImpact, matchedExplanation, unmatchedExplanation){
             customPropositionScope.get(this).internalScoreModifiers.push({
                 type: "policy",
-                policy: policyPosition,
+                policy,
                 value: targetValue,
                 impact: scoreImpact,
                 explanation: matchedExplanation
@@ -64,10 +70,10 @@ const { type } = require("./enums/propositions");
                 if(typeof targetValue !== 'boolean') throw new Error("Cannot add an inverse score modifier for a non-boolean policy position");
                 customPropositionScope.get(this).internalScoreModifiers.push({
                     type: "policy",
-                    policy: policyPosition,
+                    policy,
                     value: !targetValue,
                     impact: -scoreImpact,
-                    unmatchedExplanation
+                    explanation: unmatchedExplanation
                 });
             }
         }

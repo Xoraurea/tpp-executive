@@ -48,7 +48,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 
 ## Executive.game
 
-[Executive.game](game.md) exposes child functions to influence the current state of the loaded game. These include functions implementing functionality exposed by custom events (such as party identification shifts).
+[Executive.game](game.md) exposes child functions to influence the current state of the loaded game and to extend game functionality. These include functions implementing functionality exposed by custom events (such as party identification shifts).
 
 ### Children
 
@@ -56,12 +56,15 @@ Priority of stylesheets added is dependent upon the order in which they are load
 - `loaded` : boolean – Represents whether the player has loaded a save/started a new game.
 - `traits` : Array\<string\> – An array of user-selectable traits for customisation.
 - `customTraits` : Array\<string\> – An array containing every trait added by modifications through Executive.
+- `customPropositions` : Array\<CustomProposition\> – An array containing every custom legislative proposition added by modifications through Executive.
 - `triggerNextTurn()` – Trigger the next in-game turn.
 - `changeStatewidePartyID(stateId, sourceParty, destParty, percentage)` – Move a percentage amount of voters identifying with one party to a different party in the given state.
 - `createGeneralOfficeMessage(title, message, character)` – Create a message in the Summary tab of the Office pane.
 - `createCityNews(title, message, character, week)` – Create a city-wide news item in the News pane.
 - `createStateNews(title, message, character, week)` – Create a state-wide news item in the News pane.
 - `createNationalNews(title, message, character, week)` – Create a nationwide news item in the News pane.
+- `registerTrait(traitName)` – Register a new trait for characters.
+- `registerProposition(propObject, propLevel, startState)` – Register a new custom legislative proposition to be added to player bills.
 
 ## Executive.data
 
@@ -107,7 +110,17 @@ The `Executive.version` object describes the version of Executive running.
 
 ## Executive.enums
 
-`Executive.enums` contains enums for use when working with game objects. The sole child, `characterArray`, contains child objects corresponding to each type of in-game character, with each child object containing properties representing the index in a CharacterArray for the relevant character property. This enum largely exists for internal use.
+[`Executive.enums`](enums.md) contains enums for use when working with game objects.
+
+- `characters` – Enums for referencing characters in the Executive API.
+  - `ideology` – Encodings for ideologies held by characters.
+  - `ideologyType` – Encodings for the two types of ideology each player has.
+- `propositions` – Enums for use with Executive's support for custom legislative propositions.
+  - `type` – Types of custom propositions.
+  - `category` – Categories for custom propositions to be placed within in the game's legislation editor.
+  - `level` – Levels of government custom propositions can be enacted at.
+- `characterArray` – An enum for internal use.
+- `characterLength` – An enum for internal use.
 
 ## Executive.debug
 

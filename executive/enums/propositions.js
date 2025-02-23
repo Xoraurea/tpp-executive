@@ -3,7 +3,8 @@
 
 module.exports = {
     type: {
-        trueFalse: 0
+        trueFalse: 0,
+        motion: 1
     },
     category: {
         crime: "Crime",

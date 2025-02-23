@@ -8,14 +8,16 @@ The `Executive.game` API implements a range of functions to influence the curren
     - [loaded : boolean](#loaded--boolean)
     - [traits : Array\<string\>](#traits--arraystring)
     - [customTraits : Array\<string\>](#customtraits--arraystring)
+    - [customPropositions : Array\<CustomProposition\>](#custompropositions--arraycustomproposition)
   - [Functions](#functions)
     - [triggerNextTurn() : void](#triggernextturn--void)
     - [changeStatewidePartyID(stateId : string, sourceParty : string, destParty : string, percentage : number) : void](#changestatewidepartyidstateid--string-sourceparty--string-destparty--string-percentage--number--void)
     - [createGeneralOfficeMessage(title : string, message : string, *character : CharacterObject*) : void](#creategeneralofficemessagetitle--string-message--string-character--characterobject--void)
-    - [createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createcitynewstitle--string-message--string-character--characterobject-week--number)
-    - [createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createstatenewstitle--string-message--string-character--characterobject-week--number)
-    - [createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*)](#createnationalnewstitle--string-message--string-character--characterobject-week--number)
-    - [registerTrait(traitName : string)](#registertraittraitname--string)
+    - [createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void](#createcitynewstitle--string-message--string-character--characterobject-week--number--void)
+    - [createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void](#createstatenewstitle--string-message--string-character--characterobject-week--number--void)
+    - [createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void](#createnationalnewstitle--string-message--string-character--characterobject-week--number--void)
+    - [registerTrait(traitName : string) : void](#registertraittraitname--string--void)
+    - [registerProposition(propObject : CustomProposition, propLevel : string, startState : boolean)](#registerpropositionpropobject--customproposition-proplevel--string-startstate--boolean)
 
 
 ## Properties
@@ -34,7 +36,11 @@ The `Executive.game` API implements a range of functions to influence the curren
 
 ### customTraits : Array\<string\>
 
-`traits` is an array containing every custom trait added to the game through Executive by modifications.
+`customTraits` is an array containing every custom trait added to the game through Executive by modifications.
+
+### customPropositions : Array\<CustomProposition\>
+
+`customPropositions` is an array containing every custom legislation proposition registered through Executive by modifications.
 
 ## Functions
 
@@ -59,7 +65,7 @@ The `Executive.game` API implements a range of functions to influence the curren
 - `message` : string – The contents of the message to be created.
 - `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the message.
 
-### createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+### createCityNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void
 
 `createCityNews` adds a new news item to the City tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
 
@@ -68,7 +74,7 @@ The `Executive.game` API implements a range of functions to influence the curren
 - `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
 - `week` : number – *Optional.* The week number of the news item to be created.
 
-### createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+### createStateNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void
 
 `createStateNews` adds a new news item to the State tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
 
@@ -77,7 +83,7 @@ The `Executive.game` API implements a range of functions to influence the curren
 - `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
 - `week` : number – *Optional.* The week number of the news item to be created.
 
-### createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*)
+### createNationalNews(title : string, message : string, *character : CharacterObject*, *week : number*) : void
 
 `createNationalNews` adds a new news item to the Nation tab of the game's News pane. The created message will have the title given by `title`, and contents equal to `message`. If `character` is passed, the object passed will be used to add a clickable portrait to the news item. If `week` is passed, the item will be dated with the given week number. This function will throw an error if called while no game is loaded.
 
@@ -86,8 +92,16 @@ The `Executive.game` API implements a range of functions to influence the curren
 - `character` : CharacterObject – *Optional.* The character to be used when adding a portrait to the news item.
 - `week` : number – *Optional.* The week number of the news item to be created.
 
-### registerTrait(traitName : string)
+### registerTrait(traitName : string) : void
 
 `registerTrait` adds a trait with the name `traitName` to the game, allowing the player to add it to any character via the character customisation screen and in the triggers and effects of any custom event via the Custom Event Tool. These traits will not currently be picked when using the Randomize button or when the game randomly generates characters.
 
 - `traitName` : string – The name of the trait to be added.
+
+### registerProposition(propObject : CustomProposition, propLevel : string, startState : boolean)
+
+`registerProposition` adds a custom legislation proposition as represented by `propObject` to the game, allowing the player to add it to any bills made at the government level represented by `propLevel`. These propositions will currently not be selected by the game when random bills by non-player characters are generated.
+
+- `propObject` : CustomProposition – The proposition to be added to the game.
+- `propLevel` : string – The level of government the proposition can be proposed at. Valid values are contained within [`Executive.enums.propositions.level`](./enums.md#level).
+- `startState` : boolean – The starting state of the policy the proposition represents for every jurisdiction at the given level of government. *Ignored for propositions with type `Executive.enums.propositions.type.motion`.*

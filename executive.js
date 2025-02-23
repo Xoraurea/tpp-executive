@@ -305,6 +305,19 @@ Executive.debug = nw.require("executive/debug.js");
         return obj._executiveModData[targetMod.id];
     };
 
+    const getGlobalModData = (callerDir) => {
+        if(nationStats._executiveGlobalModData === undefined) nationStats._executiveGlobalModData = {};
+
+        /* We need to get the mod ID. */
+        const reducedMods = Executive.mods.loaded.filter(mod => mod._modPath === callerDir.substring(0, mod._modPath.length));
+        if(reducedMods.length === 0) throw new Error("Attempted to access mod data from script outside of mod directory");
+
+        const targetMod = reducedMods[0];
+        if(nationStats._executiveGlobalModData[targetMod.id] === undefined) nationStats._executiveGlobalModData[targetMod.id] = {};
+        
+        return nationStats._executiveGlobalModData[targetMod.id];
+    };
+
     Executive.mods.getCharacterSaveData = (character) => {
         /* Get the data stored for a CharacterObject for a mod. */
         if(character.characterType === undefined) throw new Error("Expected CharacterObject");
@@ -327,7 +340,7 @@ Executive.debug = nw.require("executive/debug.js");
     Object.defineProperty(Executive.mods, "saveData", {
         get: () => {
             if(!Executive.game.loaded) throw new Error("Not in a loaded game");
-            return getModData(globalThis, getCallerDir().substring(__dirname.length + 1) + path.sep);
+            return getGlobalModData(getCallerDir().substring(__dirname.length + 1) + path.sep);
         }
     });
 
@@ -502,6 +515,11 @@ Executive.functions.createRawPostHook("addIntroMenu", () => {
 /* Now clean up internal Executive functions. */
 Executive.functions.createRawPreHook = undefined;
 Executive.functions.createRawPostHook = undefined;
+Executive.functions.insertRawReplacement = undefined;
+
+/* Add class definitions to the global environment. */
+globalThis.BindableEvent = Executive.classes.BindableEvent;
+globalThis.CustomProposition = Executive.classes.CustomProposition;
 
 /* Mods will export init entrypoints. We need to go through and call those. */
 Executive.mods.loaded.forEach(modEntry => {

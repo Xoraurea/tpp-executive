@@ -364,6 +364,18 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                         cityStats[propObject.id] = startState;
                     } else throw new Error("Undefined level of government for registered proposition");
                     break;
+                case Executive.enums.propositions.type.motion:
+                    /* It's easier to just encode a motion as a law always set to false. */
+                    if(propLevel === "nation"){
+                        nationStats[propObject.id] = false;
+                    } else if(propLevel === "state"){
+                        Executive.data.states.allStates.forEach(stateObj => {
+                            stateObj[propObject.id] = false;
+                        });
+                    } else if(propLevel === "city"){
+                        cityStats[propObject.id] = false;
+                    } else throw new Error("Undefined level of government for registered proposition");
+                    break;
                 default:
                     throw new Error("Unimplemented type of proposition registered");
                     break;
@@ -380,7 +392,17 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
 
             targetArray.forEach(custProp => {
                 if(targetStats[custProp.id] === undefined){
-                    targetStats[custProp.id] = custProp.startState;
+                    switch(custProp.type){
+                        case Executive.enums.propositions.type.trueFalse:
+                            targetStats[custProp.id] = custProp.startState;
+                            break;
+                        case Executive.enums.propositions.type.motion:
+                            targetStats[custProp.id] = false;
+                            break;
+                        default:
+                            throw new Error("Unimplemented type of proposition registered");
+                            break;
+                    }
                 }
             });
         });
@@ -489,7 +511,10 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
             alertFunc(custProp.description);
         };
 
-        /* Generate the policy controls. */
+        /* Generate the policy controls.
+           We don't need these if the proposition is a motion. */
+        if(custProp.type === Executive.enums.propositions.type.motion) return;
+
         const innerDiv = document.createElement("div");
         innerDiv.setAttribute("class", "propMainInner");
         propDiv.appendChild(innerDiv);
@@ -608,6 +633,11 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                                 activeH3.textContent = (isActive ? "Active" : "Inactive");
                                 titleDiv.appendChild(activeH3);
 
+                                /* If the proposition is a motion, it can never be active and this
+                                   element is redundant. */
+                                if(custProp.type === Executive.enums.propositions.type.motion)
+                                    activeH3.setAttribute("style", "display: none;");
+
                                 /* Add the description of the proposition. */
                                 const descDiv = document.createElement("div");
                                 descDiv.setAttribute("class", "selBillPropDescD");
@@ -665,6 +695,10 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                                         policy: isActive,
                                         title: custProp.title
                                     };
+
+                                    /* The default state of a motion proposition will always be false, but
+                                       the game and Executive need to see it as true. */
+                                    if(custProp.type === Executive.enums.propositions.type.motion) newPropElement.policy = true;
 
                                     const newIndex = newPropArray.push(newPropElement);
                                     const propContainerDiv = document.getElementById("compBillPropMenu");
@@ -759,8 +793,11 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                 if(targetDistrictStats[custProp.id] !== propObj.policy) custProp.scoreModifiers.forEach(scoreModifier => {
                     /* The scores are for the case where the policy is made true. If the policy
                        is made false, people will logically hold the opposite position. */
-                    const calcImpact = ((scoreModifier.type !== "custom") ? scoreModifier.impact : 0)
-                        * ((propObj.policy) ? 1 : -1);
+                    let calcImpact = ((scoreModifier.type !== "custom") ? scoreModifier.impact : 0);
+
+                    /* If the policy can be enabled or disabled, we need to make sure scores are
+                       reversed when the policy is disabled. */
+                    if(custProp.type !== Executive.enums.propositions.type.motion) calcImpact *= ((propObj.policy) ? 1 : -1);
 
                     switch(scoreModifier.type){
                         case "policy":
@@ -798,7 +835,7 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
                         case "custom":
                             const resolverRtn = scoreModifier.resolver(wrappedChar, propObj, billLevel);
                             if(resolverRtn !== null){
-                                const resolvedImpact = resolverRtn.impact * ((propObj.policy) ? 1 : -1);
+                                const resolvedImpact = resolverRtn.impact /* * ((propObj.policy) ? 1 : -1) */;
                                 rtnItems.push({
                                     id: custProp.title,
                                     desc: resolverRtn.explanation,
@@ -825,7 +862,7 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
 
         lawObject.amendProps.forEach(lawProp => {
             const custProp = propositionArrays[lawObject.district].find(candProp => candProp.id === lawProp.id);
-            if(custProp){
+            if(custProp && custProp.type !== Executive.enums.propositions.type.motion){
                 const districtStats = (lawObject.district === "school") ? schoolBoardStats
                     : eval(`${lawObject.district}Stats`);
                 districtStats[lawProp.id] = lawProp.policy;
@@ -931,8 +968,7 @@ const { updateTooltip } = require("../modFiles/better-maps/tooltip");
         }
     });
 
-    /* TODO check: Handle the special case of a presidential
-       veto. */
+    /* Handle the special case of a presidential veto. */
     Executive.functions.registerPostHook("presBillVoteComplex", (args) => {
         const lawObject = args[0];
 

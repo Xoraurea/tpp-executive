@@ -65,7 +65,7 @@ Creating a mod for The Political Process with Executive is accessible for anyone
 
 ### Installing the nw.js SDK
 
-The first step to create a mod is to install the SDK release of nw.js – this allows for use of the Inspector within the game. Navigate to https://dl.nwjs.io and grab the Windows SDK release of nw.js v0.41.2 for x64 – incompatibility of the game's compiled bytecode prevents the use of other versions of nw.js. Once the archive has downloaded, copy and paste its contents over the folder for The Political Process, replacing any files necessary. After doing this, opening The Political Process and right-clicking in-game will provide the `Inspect element` option.
+The first step to create a mod is to install the SDK release of nw.js – this allows for use of the Inspector within the game. Navigate to https://dl.nwjs.io and grab the Windows SDK release of nw.js v0.41.2 for x64 – incompatibility of the game's compiled bytecode will likely prevent the use of other versions of nw.js. Once the archive has downloaded, copy and paste its contents over the folder for The Political Process, replacing any files necessary. After doing this, opening The Political Process and right-clicking in-game will provide the `Inspect element` option.
 
 ### Creating a new mod
 
