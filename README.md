@@ -53,7 +53,7 @@ Save this file and close it. **You've now successfully installed Executive!** To
 
 ### Installing mods
 
-You're now ready to install mods! Mods are stored as folders in `modFiles`, containing at least a `main.js` and a `manifest.json` file. You can name the containing folder whatever you want, but it'll likely be helpful to name it something specific to the mod it contains.
+You're now ready to install mods! Mods are stored as folders in `modFiles`, containing at least a `main.js` and a `manifest.json` file. You can name the containing folder whatever you want, but it'll likely be helpful to name it something specific to the mod it contains. If you'd like some mods to get started with, check out [this](https://github.com/Xoraurea/my-tpp-mods) repository.
 
 **Security Notice:** As with any computer program, by installing mods, you are granting the developer(s) of the mod the ability to run code and access files on your computer. Do **not** install a mod if you do not trust its source or its developer(s). The Executive project holds no responsibility or liability for the result of installing third-party modifications.
 
