@@ -37,7 +37,7 @@ The first file to modify is `index.html`. Open the file in any text editor, and 
 globalThis.preGlobals = Object.keys(globalThis);
 ```
 
-After pasting these two lines, scroll down to the line containing nothing except `</script>`. Once you're there, paste the following snippet *above* the `</script>` line.
+After pasting these two lines, scroll down to the line containing nothing except `</script>`. Once you're there, paste the following snippet **above** (not below) the `</script>` line.
 
 ```
 nw.Window.get().eval(null, fs.readFileSync("executive.js", "utf-8")); };
