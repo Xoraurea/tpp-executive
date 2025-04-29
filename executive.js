@@ -14,9 +14,8 @@ let Executive = {
     version: {
         major: 0,
         minor: 1,
-        revision: 0,
-        string: "b0.1.0"
-        //gameVersion: version
+        revision: 1,
+        string: "b0.1.1"
     },
     mods: {
         count: 0,
@@ -40,27 +39,6 @@ let Executive = {
 global.Executive = Executive;
 
 console.log("[Executive] Executive for The Political Process (" + Executive.version.string + ")");
-
-/* We need to make sure to save the save data mods generate. We overwrite this before anything
-   else so that Executive's function modification API treats the new version of the function
-   as the canonical version. */
-{
-    const originalWriteFunc = writeToFileNWJS;
-
-    writeToFileNWJS = (savePath, saveJSON) => {
-        /* Annoyingly, we need to re-parse the JSON and then re-stringify it. Yes, this is dumb
-           and slow. There's no other apparent way. */
-        try {
-            const saveObj = JSON.parse(saveJSON);
-            saveObj._executiveModData = globalThis._executiveModData;
-            originalWriteFunc(savePath, JSON.stringify(saveObj));
-        } catch {
-            console.error("[Executive] Failed to save game with mod data; saving vanilla save data");
-            originalWriteFunc(savePath, saveJSON);
-            alertFunc("Executive failed to save the game with global modification save data. The game has been saved without this data.");
-        }
-    };
-};
 
 /* Now we hook every function that the game adds to the global environment. */
 {
@@ -490,17 +468,6 @@ if(!fs.existsSync("modFiles")){
         }
     });
 };
-
-/* We'll install a pre-hook to load global mod save data before the game fully loads. */
-Executive.functions.createRawPreHook("loadFunction", (args) => {
-    const savePath = nw.App.dataPath + path.sep + "saveFiles" + path.sep + "campaignSaves" + path.sep + args[0];
-    const saveObj = JSON.parse(fs.readFileSync(savePath, "utf8"));
-    if(saveObj._executiveModData !== undefined){
-        globalThis._executiveModData = saveObj._executiveModData
-    } else {
-        globalThis._executiveModData = {};
-    };
-});
 
 /* Add the version string to the main menu on first load. */
 Executive.functions.createRawPostHook("addIntroMenu", () => {
