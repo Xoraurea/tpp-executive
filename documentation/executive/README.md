@@ -110,7 +110,7 @@ The `Executive.version` object describes the version of Executive running.
 
 ## Executive.enums
 
-[`Executive.enums`](enums.md) contains enums for use when working with game objects.
+[Executive.enums](enums.md) contains enums for use when working with game objects.
 
 - `characters` – Enums for referencing characters in the Executive API.
   - `ideology` – Encodings for ideologies held by characters.

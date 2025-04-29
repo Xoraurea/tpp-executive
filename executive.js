@@ -355,6 +355,7 @@ Executive.debug = nw.require("executive/debug.js");
         });
     };
 
+    let currentTheme = "light";
     Executive.styles.onThemeChange = new Executive.classes.BindableEvent("ExecutiveOnThemeChange");
 
     /* For theme-aware styles, we need to listen for changes to the game's normal style tag. */
@@ -362,6 +363,8 @@ Executive.debug = nw.require("executive/debug.js");
         let newThemeState = (themeNode.getAttribute("href") === "cssFiles/darkModeCSS.css") ? true : false;
 
         if(newThemeState !== themeNode){
+            currentTheme = newThemeState ? "dark" : "light";
+
             darkMode = newThemeState;
             Executive.styles.registeredStyles.forEach(style => {
                 if(style.light !== style.dark){
@@ -373,6 +376,10 @@ Executive.debug = nw.require("executive/debug.js");
     });
 
     styleListener.observe(themeNode, {attributes: true});
+
+    Object.defineProperty(Executive.styles, "currentTheme", {
+        get: () => {return currentTheme;}
+    });
 };
 
 /* The game has lots of data structures that are in the global environment but aren't neatly 
