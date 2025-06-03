@@ -464,6 +464,8 @@ if(!fs.existsSync("modFiles")){
                     const compatNum = (manifestObj.required_loader_version !== undefined) ? checkVersionSupported(manifestObj.required_loader_version)
                         : 1;
                     if(compatNum === 0){
+                        alertFunc("The mod " + manifestObj.name + " (" + manifestObj.id + `) is too new for this version of Executive. Please update Executive or install an older version of the mod.\
+                            (Required v${manifestObj.required_loader_version.major}.${manifestObj.required_loader_version.minor}.${manifestObj.required_loader_version.revision})`);
                         console.warn("[Executive] Unable to load mod " + manifestObj.name + " [" + manifestObj.id + "]; required Executive version too high");
                     } else {
                         loadMod(pathPrefix, manifestObj);
