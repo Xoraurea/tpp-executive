@@ -14,8 +14,8 @@ let Executive = {
     version: {
         major: 0,
         minor: 1,
-        revision: 1,
-        string: "b0.1.1"
+        revision: 2,
+        string: "b0.1.2"
     },
     mods: {
         count: 0,
@@ -323,7 +323,7 @@ Executive.debug = nw.require("executive/debug.js");
     });
 
     Executive.styles.registerStyle = (relativePath) => {
-        const stylePath = getCallerDir() + path.sep + relativePath;
+        const stylePath = getCallerDir().substring(__dirname.length + 1) + path.sep + relativePath;
 
         const newStyleElem = document.createElement("link");
         newStyleElem.setAttribute("href", stylePath);
@@ -339,8 +339,8 @@ Executive.debug = nw.require("executive/debug.js");
     };
 
     Executive.styles.registerThemeAwareStyle = (relativeLightPath, relativeDarkPath) => {
-        const lightPath = getCallerDir() + path.sep + relativeLightPath;
-        const darkPath = getCallerDir() + path.sep + relativeDarkPath;
+        const lightPath = getCallerDir().substring(__dirname.length + 1) + path.sep + relativeLightPath;
+        const darkPath = getCallerDir().substring(__dirname.length + 1) + path.sep + relativeDarkPath;
 
         const newStyleElem = document.createElement("link");
         newStyleElem.setAttribute("href", darkMode ? darkPath : lightPath);
