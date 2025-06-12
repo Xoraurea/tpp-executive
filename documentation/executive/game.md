@@ -9,6 +9,8 @@ The `Executive.game` API implements a range of functions to influence the curren
     - [traits : Array\<string\>](#traits--arraystring)
     - [customTraits : Array\<string\>](#customtraits--arraystring)
     - [customPropositions : Array\<CustomProposition\>](#custompropositions--arraycustomproposition)
+  - [Events](#events)
+    - [onGameLoad : BindableEvent(eventObj)](#ongameload--bindableeventeventobj)
   - [Functions](#functions)
     - [triggerNextTurn() : void](#triggernextturn--void)
     - [changeStatewidePartyID(stateId : string, sourceParty : string, destParty : string, percentage : number) : void](#changestatewidepartyidstateid--string-sourceparty--string-destparty--string-percentage--number--void)
@@ -41,6 +43,12 @@ The `Executive.game` API implements a range of functions to influence the curren
 ### customPropositions : Array\<CustomProposition\>
 
 `customPropositions` is an array containing every custom legislation proposition registered through Executive by modifications.
+
+## Events
+
+### onGameLoad : BindableEvent(eventObj)
+
+`onGameLoad` is fired whenever a save is loaded or a new game is begun by the player. `onGameLoad` does not pass any additional parameters to registered event listeners.
 
 ## Functions
 

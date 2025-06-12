@@ -57,6 +57,7 @@ Priority of stylesheets added is dependent upon the order in which they are load
 - `traits` : Array\<string\> – An array of user-selectable traits for customisation.
 - `customTraits` : Array\<string\> – An array containing every trait added by modifications through Executive.
 - `customPropositions` : Array\<CustomProposition\> – An array containing every custom legislative proposition added by modifications through Executive.
+- `onGameLoad` : BindableEvent(eventObj) – A `BindableEvent` fired whenever the player loads a save or a new game.
 - `triggerNextTurn()` – Trigger the next in-game turn.
 - `changeStatewidePartyID(stateId, sourceParty, destParty, percentage)` – Move a percentage amount of voters identifying with one party to a different party in the given state.
 - `createGeneralOfficeMessage(title, message, character)` – Create a message in the Summary tab of the Office pane.
