@@ -26,9 +26,9 @@ Once you've opened your game folder, download the most recent release of Executi
 
 From the files extracted, copy `executive.js`, the `modFiles` folder and the `executive` folder to the game folder you opened before. If `package.json` and `index.html` are amongst the extracted files, you can copy these too, overwriting the existing versions, and skip to [Installing mods](#installing-mods).
 
-If your download doesn't contain `package.json` and `index.html`, you now need to modify the necessary files to load Executive.
-
 ### Modifying index.html and package.json
+
+**Note:** This step is **only** necessary if the version of Executive you've downloaded doesn't contain its own pre-modified `package.json` and `index.html` files. If it does contain these files, you can simply copy them over to your game folder, overwriting the original versions. Once you've done so, skip to [Installing mods](#installing-mods).
 
 For Executive to load successfully, you'll need to copy three lines into two game files – future releases of Executive will likely include an install script to simplify this process. This step **must** be repeated if The Political Process updates or you reverify your game files in Steam.
 
@@ -88,6 +88,8 @@ Creating a mod for The Political Process with Executive is accessible for anyone
 ### Installing the nw.js SDK
 
 The first step to create a mod is to install the SDK release of nw.js – this allows for use of the Inspector within the game. Navigate to https://dl.nwjs.io and grab the Windows SDK release of nw.js v0.41.2 for x64 – incompatibility of the game's compiled bytecode will likely prevent the use of other versions of nw.js. Once the archive has downloaded, copy and paste its contents over the folder for The Political Process, replacing any files necessary. After doing this, opening The Political Process and right-clicking in-game will provide the `Inspect element` option.
+
+**Update (12/06/2025):** If you're using the latest Judicial Update beta for mod development, you should use the v0.100.1 release of nw.js instead of the v0.41.2 release. This is due to the framework version packaged with the game changing.
 
 ### Creating a new mod
 
